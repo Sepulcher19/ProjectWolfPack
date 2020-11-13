@@ -127,6 +127,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: Player
   level: 1
-  damage: 5
+  damage: 10
   maxHP: 30
   currentHP: 30

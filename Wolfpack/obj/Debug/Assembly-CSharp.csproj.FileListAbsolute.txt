@@ -305,3 +305,7 @@ D:\University Work\Master\GameJams\Weeks4-6\Wolfpack\obj\Debug\Assembly-CSharp.c
 D:\University Work\Master\GameJams\Weeks4-6\Wolfpack\obj\Debug\Assembly-CSharp.csproj.CopyComplete
 D:\University Work\Master\GameJams\Weeks4-6\Wolfpack\obj\Debug\Assembly-CSharp.dll
 D:\University Work\Master\GameJams\Weeks4-6\Wolfpack\obj\Debug\Assembly-CSharp.pdb
+D:\University Work\New folder\ProjectWolfPack\Wolfpack\obj\Debug\Assembly-CSharp.csprojAssemblyReference.cache
+D:\University Work\New folder\ProjectWolfPack\Wolfpack\obj\Debug\Assembly-CSharp.csproj.CoreCompileInputs.cache
+D:\University Work\New folder\ProjectWolfPack\Wolfpack\obj\Debug\Assembly-CSharp.dll
+D:\University Work\New folder\ProjectWolfPack\Wolfpack\obj\Debug\Assembly-CSharp.pdb
