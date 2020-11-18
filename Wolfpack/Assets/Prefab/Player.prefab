@@ -90,7 +90,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3051027358068424257}
-  - component: {fileID: 8499483979776667317}
+  - component: {fileID: 5690142652896633407}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -113,7 +113,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8499483979776667317
+--- !u!114 &5690142652896633407
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -122,11 +122,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 7742085749281812654}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 79c6130402ef9a4469e779ab174d8e68, type: 3}
+  m_Script: {fileID: 11500000, guid: 2a09016bc288c984495e5d824a08f988, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Name: Player
-  level: 1
-  damage: 10
-  maxHP: 30
-  currentHP: 30
+  count: 0
+  level: 0
+  maxHP: 0
+  currentHP: 0
+  attackDamage: 0
+  specialDamage: 0
+  specialCooldown: 0

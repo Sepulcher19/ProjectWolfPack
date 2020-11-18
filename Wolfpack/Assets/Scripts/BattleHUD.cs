@@ -9,7 +9,7 @@ public class BattleHUD : MonoBehaviour
 
     public Slider hpSlider;
 
-
+    
     // Start is called before the first frame update
     void Start()
     {

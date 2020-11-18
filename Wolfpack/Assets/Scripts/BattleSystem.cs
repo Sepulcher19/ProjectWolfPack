@@ -3,14 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public enum BattleState { START, PLAYERTURN, ENEMYTURN, WON, LOST }
+public enum BattleState { START, ALPHATURN, BETATURN, ELDERTURN, ENEMYTURN, WON, LOST }
 
 public class BattleSystem : MonoBehaviour
 {
-    public GameObject playerPrefab;
+    public GameObject AlphaPrefab;
+    public GameObject BetaPrefab;
+    public GameObject ElderPrefab;
     public GameObject enemyPrefab;
 
-    public Transform playerBattlePosition;
+    
+    public Transform AlphaBattlePosition;
+    public Transform BetaBattlePosition;
+    public Transform ElderBattlePosition;
     public Transform enemyBattlePosition;
 
     public BattleState state;
@@ -18,7 +23,9 @@ public class BattleSystem : MonoBehaviour
     public BattleHUD playerHUD;
     public BattleHUD enemyHUD;
 
-    Unit playerUnit;
+    Unit alphaUnit;
+    Unit betaUnit;
+    Unit elderUnit;
     Unit enemyUnit;
 
     public Text dialogueText;
@@ -40,51 +47,81 @@ public class BattleSystem : MonoBehaviour
     void Update()
     {
         
+        if (state == BattleState.ELDERTURN)
+        {
+            ElderTurn();
+        }
+        if (state == BattleState.ENEMYTURN)
+        {
+            StartCoroutine(EnemyTurn());
+        }
     }
+
     IEnumerator SetupBattle()
     {
         SpawnPlayers();
-        GameObject playerGO = Instantiate(playerPrefab, playerBattlePosition);
-        playerUnit = playerGO.GetComponent<Unit>();
+       
 
         GameObject enemyGO = Instantiate(enemyPrefab, enemyBattlePosition);
         enemyUnit = enemyGO.GetComponent<Unit>();
 
         dialogueText.text = "A wild " + enemyUnit.Name + " approaches";
 
-        playerHUD.SetHUD(playerUnit);
+        playerHUD.SetHUD(alphaUnit);
         enemyHUD.SetHUD(enemyUnit);
 
         yield return new WaitForSeconds(2f);
 
-        state = BattleState.PLAYERTURN;
+        state = BattleState.ALPHATURN;
         PlayerTurn();
     }
-
-    public void SpawnPlayers()
+    IEnumerator AlphaAttack()
     {
-        if (alphaAlive)
+       bool isDead = enemyUnit.TakeDamage(alphaUnit.attackDamage);
+
+        enemyHUD.SetHP(enemyUnit.currentHP);
+        dialogueText.text = "The attack is successful";
+
+        yield return new WaitForSeconds(2f);
+
+        if (isDead)
         {
-            //spawn alpha
-            //get alpha unit
+            state = BattleState.WON;
+            EndBattle();
         }
-        if (betaAlive)
+        else
         {
-            //GameObject betaWolves = instantiate(betaPrefab, betaposition)
-            //get beta unit 
+            state = BattleState.BETATURN;
+            BetaTurn();
         }
-        if (elderAlive)
-        {
-            //spawn elder
-            //get elder unit
-        }
-        else { dialogueText.text = "youre out of wolves, you suck!"; }
 
     }
-
-    IEnumerator PlayerAttack()
+    IEnumerator BetaAttack()
     {
-       bool isDead = enemyUnit.TakeDamage(playerUnit.damage);
+       
+
+        bool isDead = enemyUnit.TakeDamage(betaUnit.attackDamage);
+
+        enemyHUD.SetHP(enemyUnit.currentHP);
+        dialogueText.text = "The attack is successful";
+
+        yield return new WaitForSeconds(2f);
+
+        if (isDead)
+        {
+            state = BattleState.WON;
+            EndBattle();
+        }
+        else
+        {
+            state = BattleState.ELDERTURN;
+            BetaTurn();
+        }
+        Debug.Log("betaturn");
+    }
+    IEnumerator ElderAttack()
+    {
+        bool isDead = enemyUnit.TakeDamage(elderUnit.attackDamage);
 
         enemyHUD.SetHP(enemyUnit.currentHP);
         dialogueText.text = "The attack is successful";
@@ -99,7 +136,7 @@ public class BattleSystem : MonoBehaviour
         else
         {
             state = BattleState.ENEMYTURN;
-            StartCoroutine(EnemyTurn());
+            
         }
 
     }
@@ -109,9 +146,9 @@ public class BattleSystem : MonoBehaviour
 
         yield return new WaitForSeconds(1f);
 
-        bool isDead = playerUnit.TakeDamage(enemyUnit.damage);
+        bool isDead = alphaUnit.TakeDamage(enemyUnit.attackDamage);
 
-        playerHUD.SetHP(playerUnit.currentHP);
+        playerHUD.SetHP(alphaUnit.currentHP);
 
         yield return new WaitForSeconds(1f);
 
@@ -122,36 +159,90 @@ public class BattleSystem : MonoBehaviour
         }
         else
         {
-            state = BattleState.PLAYERTURN;
+            state = BattleState.ALPHATURN;
             PlayerTurn();
         }
 
     }
 
-    void EndBattle()
-    {
-        if(state == BattleState.WON)
-        {
-            dialogueText.text = "You won the battle!";
 
-        } else if (state == BattleState.LOST)
+    public void SpawnPlayers()
+    {
+        if (alphaAlive)
         {
-            dialogueText.text = "you were Defeated.";
+            GameObject playerGO = Instantiate(AlphaPrefab, AlphaBattlePosition);
+            alphaUnit = playerGO.GetComponent<Unit>();
+        }
+        if (betaAlive)
+        {
+            GameObject playerGO = Instantiate(BetaPrefab, BetaBattlePosition);
+            betaUnit = playerGO.GetComponent<Unit>();
+        }
+        if (elderAlive)
+        {
+            GameObject playerGO = Instantiate(ElderPrefab, ElderBattlePosition);
+            elderUnit = playerGO.GetComponent<Unit>();
+        }
+        else { dialogueText.text = "youre out of wolves, you suck!"; }
+
+    }
+    public void AttackButton()
+    {
+        if (state == BattleState.ALPHATURN)
+        {
+            StartCoroutine(AlphaAttack());
+        }
+        if (state == BattleState.BETATURN)
+        {
+            StartCoroutine(BetaAttack());
+        }
+        if (state == BattleState.ELDERTURN)
+        {
+            StartCoroutine(ElderAttack());
+
         }
 
     }
+    public void BetaAttackButton()
+    {
+        if (state != BattleState.BETATURN)
+            return;
 
+        StartCoroutine(BetaAttack());
+
+    }
+    public void ElderAttackButton()
+    {
+        if (state != BattleState.BETATURN)
+            return;
+
+        StartCoroutine(EnemyTurn());
+
+    }
 
     void PlayerTurn()
     {
-        dialogueText.text = "Choose an action";
+        dialogueText.text = "Aplha ready to attack!";
     }
-    public void OnAttackButton()
+    void BetaTurn()
     {
-        if (state != BattleState.PLAYERTURN)
-            return;
+        dialogueText.text = "Beta ready to attack!";
+    }
+    void ElderTurn()
+    {
+        dialogueText.text = "Elder ready to attack!";
+    }
+    void EndBattle()
+    {
+        if (state == BattleState.WON)
+        {
+            dialogueText.text = "You won the battle!";
 
-        StartCoroutine(PlayerAttack());
+        }
+        else if (state == BattleState.LOST)
+        {
+            dialogueText.text = "you were Defeated.";
+        }
 
     }
 }
