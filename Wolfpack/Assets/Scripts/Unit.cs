@@ -4,12 +4,18 @@ using UnityEngine;
 
 public class Unit : MonoBehaviour
 {
+    [Header("Overview")]
     public string Name;
-
+    public int count;
     public int level;
-    public int damage;
+    [Header("Health")]
     public int maxHP;
     public int currentHP;
+    [Header("Combat")]
+    public int attackDamage;
+    public int specialDamage;
+    public int specialCooldown;
+
 
     public bool TakeDamage(int dmg)
     {
@@ -19,7 +25,12 @@ public class Unit : MonoBehaviour
             return true;
         else
             return false;
-
-
     }
+
+    private void Update()
+    {
+        attackDamage = attackDamage * count;
+        specialDamage = attackDamage * count;
+    }
+
 }

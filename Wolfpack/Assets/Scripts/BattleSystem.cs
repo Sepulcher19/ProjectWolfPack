@@ -23,6 +23,12 @@ public class BattleSystem : MonoBehaviour
 
     public Text dialogueText;
 
+
+    bool alphaAlive = true;
+    bool betaAlive = true;
+    int betaCount;
+    bool elderAlive = true;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -37,6 +43,7 @@ public class BattleSystem : MonoBehaviour
     }
     IEnumerator SetupBattle()
     {
+        SpawnPlayers();
         GameObject playerGO = Instantiate(playerPrefab, playerBattlePosition);
         playerUnit = playerGO.GetComponent<Unit>();
 
@@ -54,6 +61,27 @@ public class BattleSystem : MonoBehaviour
         PlayerTurn();
     }
 
+    public void SpawnPlayers()
+    {
+        if (alphaAlive)
+        {
+            //spawn alpha
+            //get alpha unit
+        }
+        if (betaAlive)
+        {
+            //GameObject betaWolves = instantiate(betaPrefab, betaposition)
+            //get beta unit 
+        }
+        if (elderAlive)
+        {
+            //spawn elder
+            //get elder unit
+        }
+        else { dialogueText.text = "youre out of wolves, you suck!"; }
+
+    }
+
     IEnumerator PlayerAttack()
     {
        bool isDead = enemyUnit.TakeDamage(playerUnit.damage);
@@ -67,7 +95,8 @@ public class BattleSystem : MonoBehaviour
         {
             state = BattleState.WON;
             EndBattle();
-        } else
+        }
+        else
         {
             state = BattleState.ENEMYTURN;
             StartCoroutine(EnemyTurn());
