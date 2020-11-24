@@ -36,6 +36,8 @@ public class BattleSystem : MonoBehaviour
     int betaCount;
     bool elderAlive = true;
 
+    int hitSuccess = 80;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -47,14 +49,7 @@ public class BattleSystem : MonoBehaviour
     void Update()
     {
         
-        if (state == BattleState.ELDERTURN)
-        {
-            ElderTurn();
-        }
-        if (state == BattleState.ENEMYTURN)
-        {
-            StartCoroutine(EnemyTurn());
-        }
+      
     }
 
     IEnumerator SetupBattle()
@@ -77,88 +72,141 @@ public class BattleSystem : MonoBehaviour
     }
     IEnumerator AlphaAttack()
     {
-       bool isDead = enemyUnit.TakeDamage(alphaUnit.attackDamage);
-
-        enemyHUD.SetHP(enemyUnit.currentHP);
-        dialogueText.text = "The attack is successful";
-
-        yield return new WaitForSeconds(2f);
-
-        if (isDead)
+        if (CheckHit() == true)
         {
-            state = BattleState.WON;
-            EndBattle();
+
+            bool isDead = enemyUnit.TakeDamage(alphaUnit.attackDamage);
+
+            enemyHUD.SetHP(enemyUnit.currentHP);
+            dialogueText.text = "The attack is successful";
+
+            yield return new WaitForSeconds(2f);
+
+
+            if (isDead)
+            {
+                state = BattleState.WON;
+                EndBattle();
+            }
+            else
+            {
+                state = BattleState.BETATURN;
+                BetaTurn();
+            }
         }
         else
         {
+            dialogueText.text = "The attack missed...";
+
+            yield return new WaitForSeconds(2f);
+
             state = BattleState.BETATURN;
             BetaTurn();
         }
 
+
     }
     IEnumerator BetaAttack()
     {
-       
-
-        bool isDead = enemyUnit.TakeDamage(betaUnit.attackDamage);
-
-        enemyHUD.SetHP(enemyUnit.currentHP);
-        dialogueText.text = "The attack is successful";
-
-        yield return new WaitForSeconds(2f);
-
-        if (isDead)
+        if (CheckHit() == true)
         {
-            state = BattleState.WON;
-            EndBattle();
+
+            bool isDead = enemyUnit.TakeDamage(betaUnit.attackDamage);
+
+            enemyHUD.SetHP(enemyUnit.currentHP);
+            dialogueText.text = "The attack is successful";
+
+            yield return new WaitForSeconds(2f);
+
+            if (isDead)
+            {
+                state = BattleState.WON;
+                EndBattle();
+            }
+            else
+            {
+                state = BattleState.ELDERTURN;
+                ElderTurn();
+            }
         }
         else
         {
+            dialogueText.text = "The attack missed...";
+
+            yield return new WaitForSeconds(2f);
+
             state = BattleState.ELDERTURN;
-            BetaTurn();
+            ElderTurn();
         }
-        Debug.Log("betaturn");
+
+
     }
     IEnumerator ElderAttack()
     {
-        bool isDead = enemyUnit.TakeDamage(elderUnit.attackDamage);
-
-        enemyHUD.SetHP(enemyUnit.currentHP);
-        dialogueText.text = "The attack is successful";
-
-        yield return new WaitForSeconds(2f);
-
-        if (isDead)
+        if (CheckHit() == true)
         {
-            state = BattleState.WON;
-            EndBattle();
+
+            bool isDead = enemyUnit.TakeDamage(elderUnit.attackDamage);
+            dialogueText.text = "Elder attack successful";
+
+            enemyHUD.SetHP(enemyUnit.currentHP);
+
+            yield return new WaitForSeconds(2f);
+
+            if (isDead)
+            {
+                print("isdead");
+                state = BattleState.WON;
+                EndBattle();
+            }
+            else
+            {
+                state = BattleState.ENEMYTURN;
+
+                StartCoroutine(EnemyTurn());
+            }
         }
-        else
+        else// if it misses
         {
+            dialogueText.text = "The attack missed...";
+            yield return new WaitForSeconds(2f);
+
             state = BattleState.ENEMYTURN;
-            
+            StartCoroutine(EnemyTurn());
         }
+
 
     }
     IEnumerator EnemyTurn()
     {
+        print("test");
         dialogueText.text = enemyUnit.Name + " attacks!";
 
         yield return new WaitForSeconds(1f);
-
-        bool isDead = alphaUnit.TakeDamage(enemyUnit.attackDamage);
-
-        playerHUD.SetHP(alphaUnit.currentHP);
-
-        yield return new WaitForSeconds(1f);
-
-        if (isDead)
+        if (CheckHit() == true)
         {
-            state = BattleState.LOST;
-            EndBattle();
+            
+
+            bool isDead = alphaUnit.TakeDamage(enemyUnit.attackDamage);
+
+            playerHUD.SetHP(alphaUnit.currentHP);
+
+            yield return new WaitForSeconds(1f);
+
+            if (isDead)
+            {
+                state = BattleState.LOST;
+                EndBattle();
+            }
+            else
+            {
+                state = BattleState.ALPHATURN;
+                PlayerTurn();
+            }
         }
         else
         {
+            dialogueText.text = "The attack missed...";
             state = BattleState.ALPHATURN;
             PlayerTurn();
         }
@@ -203,26 +251,11 @@ public class BattleSystem : MonoBehaviour
         }
 
     }
-    public void BetaAttackButton()
-    {
-        if (state != BattleState.BETATURN)
-            return;
-
-        StartCoroutine(BetaAttack());
-
-    }
-    public void ElderAttackButton()
-    {
-        if (state != BattleState.BETATURN)
-            return;
-
-        StartCoroutine(EnemyTurn());
-
-    }
+   
 
     void PlayerTurn()
     {
-        dialogueText.text = "Aplha ready to attack!";
+        dialogueText.text = "Alpha ready to attack!";
     }
     void BetaTurn()
     {
@@ -245,4 +278,27 @@ public class BattleSystem : MonoBehaviour
         }
 
     }
+
+
+    public bool CheckHit()
+    {
+        
+        int hitChance = Random.Range(1, 100);
+        print(hitChance);
+        if  (hitChance <= hitSuccess) // if hit chance is lower than hit success, player hits 
+        {
+           
+            return true;
+        }
+        else
+        {
+            
+            return false;
+        }
+
+    }
+
+
+
+
 }
