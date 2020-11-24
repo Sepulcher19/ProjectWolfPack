@@ -97,8 +97,8 @@ MonoBehaviour:
   Name: Elder
   count: 1
   level: 0
-  maxHP: 1000
-  currentHP: 1000
+  maxHP: 10
+  currentHP: 10
   attackDamage: 5
   specialDamage: 0
   specialCooldown: 0

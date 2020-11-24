@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public enum BattleState { START, ALPHATURN, BETATURN, ELDERTURN, ENEMYTURN, WON, LOST }
+public enum BattleState { START, ALPHATURN, BETATURN, ELDERTURN, ENEMYTURN, ENEMYTURN2, ENEMYTURN3, WON, LOST }
 
 public class BattleSystem : MonoBehaviour
 {
@@ -11,12 +11,16 @@ public class BattleSystem : MonoBehaviour
     public GameObject BetaPrefab;
     public GameObject ElderPrefab;
     public GameObject enemyPrefab;
+    public GameObject enemy2Prefab;
+    public GameObject enemy3Prefab;
 
-    
+
     public Transform AlphaBattlePosition;
     public Transform BetaBattlePosition;
     public Transform ElderBattlePosition;
     public Transform enemyBattlePosition;
+    public Transform enemy2BattlePosition;
+    public Transform enemy3BattlePosition;
 
     public BattleState state;
 
@@ -27,6 +31,8 @@ public class BattleSystem : MonoBehaviour
     Unit betaUnit;
     Unit elderUnit;
     Unit enemyUnit;
+    Unit enemy2Unit;
+    Unit enemy3Unit;
 
     public Text dialogueText;
 
@@ -55,7 +61,7 @@ public class BattleSystem : MonoBehaviour
     IEnumerator SetupBattle()
     {
         SpawnPlayers();
-       
+        SpawnEnemy();
 
         GameObject enemyGO = Instantiate(enemyPrefab, enemyBattlePosition);
         enemyUnit = enemyGO.GetComponent<Unit>();
@@ -179,15 +185,86 @@ public class BattleSystem : MonoBehaviour
     }
     IEnumerator EnemyTurn()
     {
-        print("test");
+        
         dialogueText.text = enemyUnit.Name + " attacks!";
 
         yield return new WaitForSeconds(1f);
         if (CheckHit() == true)
         {
-            
 
+            
             bool isDead = alphaUnit.TakeDamage(enemyUnit.attackDamage);
+
+            playerHUD.SetHP(alphaUnit.currentHP);
+
+            yield return new WaitForSeconds(1f);
+
+            if (isDead)
+            {
+                state = BattleState.LOST;
+                EndBattle();
+            }
+            else
+            {
+                state = BattleState.ENEMYTURN2;
+                StartCoroutine(Enemy2Turn());
+            }
+        }
+        else
+        {
+            dialogueText.text = "The attack missed...";
+            state = BattleState.ENEMYTURN2;
+            StartCoroutine(Enemy2Turn());
+        }
+
+    }
+    IEnumerator Enemy2Turn()
+    {
+        Debug.Log("HIT");
+        
+        dialogueText.text = enemyUnit.Name + " attacks!";
+
+        yield return new WaitForSeconds(1f);
+        if (CheckHit() == true)
+        {
+
+            
+            bool isDead = alphaUnit.TakeDamage(enemy2Unit.attackDamage);
+
+            playerHUD.SetHP(alphaUnit.currentHP);
+
+            yield return new WaitForSeconds(1f);
+
+            if (isDead)
+            {
+                state = BattleState.LOST;
+                EndBattle();
+            }
+            else
+            {
+                state = BattleState.ENEMYTURN3;
+                StartCoroutine(Enemy3Turn());
+            }
+        }
+        else
+        {
+            dialogueText.text = "The attack missed...";
+            state = BattleState.ALPHATURN;
+            StartCoroutine(Enemy3Turn());
+        }
+
+    }
+    IEnumerator Enemy3Turn()
+    {
+        
+        dialogueText.text = enemyUnit.Name + " attacks!";
+
+        yield return new WaitForSeconds(1f);
+        if (CheckHit() == true)
+        {
+
+            
+            bool isDead = alphaUnit.TakeDamage(enemy3Unit.attackDamage);
 
             playerHUD.SetHP(alphaUnit.currentHP);
 
@@ -214,6 +291,7 @@ public class BattleSystem : MonoBehaviour
     }
 
 
+
     public void SpawnPlayers()
     {
         if (alphaAlive)
@@ -232,6 +310,18 @@ public class BattleSystem : MonoBehaviour
             elderUnit = playerGO.GetComponent<Unit>();
         }
         else { dialogueText.text = "youre out of wolves, you suck!"; }
+
+    }
+    public void SpawnEnemy() 
+    {
+        GameObject enemyGO = Instantiate(enemyPrefab, enemyBattlePosition);
+        enemyUnit = enemyGO.GetComponent<Unit>();
+
+        GameObject enemy2GO = Instantiate(enemy2Prefab, enemy2BattlePosition);
+        enemy2Unit = enemy2GO.GetComponent<Unit>();
+
+        GameObject enemy3GO = Instantiate(enemy3Prefab, enemy3BattlePosition);
+        enemy3Unit = enemy3GO.GetComponent<Unit>();
 
     }
     public void AttackButton()
