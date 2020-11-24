@@ -24,15 +24,22 @@ public class BattleSystem : MonoBehaviour
 
     public BattleState state;
 
-    public BattleHUD playerHUD;
-    public BattleHUD enemyHUD;
+    [Header("Player HUD")]
+    public BattleHUD alphaHUD;
+    public BattleHUD betaHUD;
+    public BattleHUD elderHUD;
+    [Header("enemy HUD")]
+    public BattleHUD enemyAlphaHUD;
+    public BattleHUD enemyBetaHUD;
+    public BattleHUD enemyElderHUD;
+
 
     Unit alphaUnit;
     Unit betaUnit;
     Unit elderUnit;
-    Unit enemyUnit;
-    Unit enemy2Unit;
-    Unit enemy3Unit;
+    Unit enemyAlphaUnit;
+    Unit enemyBetaUnit;
+    Unit enemyElderUnit;
 
     public Text dialogueText;
 
@@ -44,46 +51,62 @@ public class BattleSystem : MonoBehaviour
 
     int hitSuccess = 80;
 
-    // Start is called before the first frame update
+    public List<Unit> playerWolves = new List<Unit>();
+    public List<Unit> enemyWolves = new List<Unit>();
+
+    private void Awake()
+    {
+        
+
+    }
     void Start()
     {
         state = BattleState.START;
         StartCoroutine(SetupBattle());
+
+
+        alphaHUD.transform.parent = alphaUnit.transform;
+        betaHUD.transform.parent = betaUnit.transform;
+        elderHUD.transform.parent = betaUnit.transform;
+
+        enemyAlphaHUD.transform.parent = enemyAlphaUnit.transform;
+        enemyBetaHUD.transform.parent = enemyBetaUnit.transform;
+        enemyElderHUD.transform.parent = enemyElderUnit.transform;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-      
-    }
-
+   
     IEnumerator SetupBattle()
     {
         SpawnPlayers();
         SpawnEnemy();
-
-        GameObject enemyGO = Instantiate(enemyPrefab, enemyBattlePosition);
-        enemyUnit = enemyGO.GetComponent<Unit>();
-
-        dialogueText.text = "A wild " + enemyUnit.Name + " approaches";
-
-        playerHUD.SetHUD(alphaUnit);
-        enemyHUD.SetHUD(enemyUnit);
+        SetupHUD();
+        
+        dialogueText.text = "A wild " + enemyAlphaUnit.Name + " approaches";
 
         yield return new WaitForSeconds(2f);
 
         state = BattleState.ALPHATURN;
         PlayerTurn();
     }
+
+
+
+
+
+
+
+
+
+
     IEnumerator AlphaAttack()
     {
         if (CheckHit() == true)
         {
+            Unit target = PlayerChooseTarget();
+            bool isDead = target.TakeDamage(alphaUnit.attackDamage);
+            print(target.gameObject.name + " hit");
 
-            bool isDead = enemyUnit.TakeDamage(alphaUnit.attackDamage);
-
-            enemyHUD.SetHP(enemyUnit.currentHP);
+            target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);   
             dialogueText.text = "The attack is successful";
 
             yield return new WaitForSeconds(2f);
@@ -116,10 +139,10 @@ public class BattleSystem : MonoBehaviour
     {
         if (CheckHit() == true)
         {
+            Unit target = PlayerChooseTarget();
+            bool isDead = target.TakeDamage(betaUnit.attackDamage);
 
-            bool isDead = enemyUnit.TakeDamage(betaUnit.attackDamage);
-
-            enemyHUD.SetHP(enemyUnit.currentHP);
+            target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
             dialogueText.text = "The attack is successful";
 
             yield return new WaitForSeconds(2f);
@@ -151,11 +174,14 @@ public class BattleSystem : MonoBehaviour
     {
         if (CheckHit() == true)
         {
+            Unit target = PlayerChooseTarget();
+            bool isDead = target.TakeDamage(elderUnit.attackDamage);
 
-            bool isDead = enemyUnit.TakeDamage(elderUnit.attackDamage);
+
             dialogueText.text = "Elder attack successful";
 
-            enemyHUD.SetHP(enemyUnit.currentHP);
+            target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
+
 
             yield return new WaitForSeconds(2f);
 
@@ -186,16 +212,16 @@ public class BattleSystem : MonoBehaviour
     IEnumerator EnemyTurn()
     {
         
-        dialogueText.text = enemyUnit.Name + " attacks!";
+        dialogueText.text = enemyAlphaUnit.Name + " attacks!";
 
         yield return new WaitForSeconds(1f);
         if (CheckHit() == true)
         {
 
-            
-            bool isDead = alphaUnit.TakeDamage(enemyUnit.attackDamage);
+            Unit target = EnemyChooseTarget();
+            bool isDead = target.TakeDamage(enemyAlphaUnit.attackDamage);
 
-            playerHUD.SetHP(alphaUnit.currentHP);
+            target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
 
             yield return new WaitForSeconds(1f);
 
@@ -222,16 +248,16 @@ public class BattleSystem : MonoBehaviour
     {
         Debug.Log("HIT");
         
-        dialogueText.text = enemyUnit.Name + " attacks!";
+        dialogueText.text = enemyAlphaUnit.Name + " attacks!";
 
         yield return new WaitForSeconds(1f);
         if (CheckHit() == true)
         {
+            Unit target = EnemyChooseTarget();
 
-            
-            bool isDead = alphaUnit.TakeDamage(enemy2Unit.attackDamage);
+            bool isDead = target.TakeDamage(enemyBetaUnit.attackDamage);
 
-            playerHUD.SetHP(alphaUnit.currentHP);
+            target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
 
             yield return new WaitForSeconds(1f);
 
@@ -257,16 +283,16 @@ public class BattleSystem : MonoBehaviour
     IEnumerator Enemy3Turn()
     {
         
-        dialogueText.text = enemyUnit.Name + " attacks!";
+        dialogueText.text = enemyAlphaUnit.Name + " attacks!";
 
         yield return new WaitForSeconds(1f);
         if (CheckHit() == true)
         {
+            Unit target = EnemyChooseTarget();
 
-            
-            bool isDead = alphaUnit.TakeDamage(enemy3Unit.attackDamage);
+            bool isDead = alphaUnit.TakeDamage(enemyElderUnit.attackDamage);
 
-            playerHUD.SetHP(alphaUnit.currentHP);
+            target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
 
             yield return new WaitForSeconds(1f);
 
@@ -290,6 +316,17 @@ public class BattleSystem : MonoBehaviour
 
     }
 
+    public Unit PlayerChooseTarget()
+    {
+        int wolfIndex = Random.Range(0, 3);
+        return enemyWolves[wolfIndex];
+    }
+
+    public Unit EnemyChooseTarget()
+    {
+        int wolfIndex = Random.Range(0, 3);
+        return enemyWolves[wolfIndex];
+    }
 
 
     public void SpawnPlayers()
@@ -298,16 +335,19 @@ public class BattleSystem : MonoBehaviour
         {
             GameObject playerGO = Instantiate(AlphaPrefab, AlphaBattlePosition);
             alphaUnit = playerGO.GetComponent<Unit>();
+            playerWolves.Add(alphaUnit);
         }
         if (betaAlive)
         {
             GameObject playerGO = Instantiate(BetaPrefab, BetaBattlePosition);
             betaUnit = playerGO.GetComponent<Unit>();
+            playerWolves.Add(betaUnit);
         }
         if (elderAlive)
         {
             GameObject playerGO = Instantiate(ElderPrefab, ElderBattlePosition);
             elderUnit = playerGO.GetComponent<Unit>();
+            playerWolves.Add(elderUnit);
         }
         else { dialogueText.text = "youre out of wolves, you suck!"; }
 
@@ -315,14 +355,16 @@ public class BattleSystem : MonoBehaviour
     public void SpawnEnemy() 
     {
         GameObject enemyGO = Instantiate(enemyPrefab, enemyBattlePosition);
-        enemyUnit = enemyGO.GetComponent<Unit>();
+        enemyAlphaUnit = enemyGO.GetComponent<Unit>();
+        enemyWolves.Add(enemyAlphaUnit);
 
         GameObject enemy2GO = Instantiate(enemy2Prefab, enemy2BattlePosition);
-        enemy2Unit = enemy2GO.GetComponent<Unit>();
+        enemyBetaUnit = enemy2GO.GetComponent<Unit>();
+        enemyWolves.Add(enemyBetaUnit);
 
         GameObject enemy3GO = Instantiate(enemy3Prefab, enemy3BattlePosition);
-        enemy3Unit = enemy3GO.GetComponent<Unit>();
-
+        enemyElderUnit = enemy3GO.GetComponent<Unit>();
+        enemyWolves.Add(enemyElderUnit);
     }
     public void AttackButton()
     {
@@ -389,6 +431,19 @@ public class BattleSystem : MonoBehaviour
     }
 
 
+
+    public void SetupHUD()
+    {
+        alphaHUD.SetHUD(alphaUnit);
+        betaHUD.SetHUD(betaUnit);
+        elderHUD.SetHUD(elderUnit);
+
+
+        enemyAlphaHUD.SetHUD(enemyAlphaUnit);
+        enemyBetaHUD.SetHUD(enemyBetaUnit);
+        enemyElderHUD.SetHUD(enemyElderUnit);
+
+    }
 
 
 }
