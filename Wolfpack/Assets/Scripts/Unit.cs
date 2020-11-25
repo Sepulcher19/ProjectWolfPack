@@ -16,6 +16,12 @@ public class Unit : MonoBehaviour
     public int specialDamage;
     public int specialCooldown;
 
+    private void Awake()
+    {
+        currentHP = maxHP;
+    }
+
+
 
     public bool TakeDamage(int dmg)
     {

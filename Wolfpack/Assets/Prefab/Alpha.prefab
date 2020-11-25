@@ -99,6 +99,6 @@ MonoBehaviour:
   level: 1
   maxHP: 10
   currentHP: 10
-  attackDamage: 5
+  attackDamage: 20
   specialDamage: 0
   specialCooldown: 0

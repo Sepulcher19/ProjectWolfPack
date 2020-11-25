@@ -7,14 +7,17 @@ public enum BattleState { START, ALPHATURN, BETATURN, ELDERTURN, ENEMYTURN, ENEM
 
 public class BattleSystem : MonoBehaviour
 {
+    [Header("Characters")]
     public GameObject AlphaPrefab;
     public GameObject BetaPrefab;
     public GameObject ElderPrefab;
     public GameObject enemyPrefab;
     public GameObject enemy2Prefab;
     public GameObject enemy3Prefab;
-
-
+    [Header("Targets")]
+    public GameObject targets;
+    
+    [Header("Battle Positions")]
     public Transform AlphaBattlePosition;
     public Transform BetaBattlePosition;
     public Transform ElderBattlePosition;
@@ -48,31 +51,34 @@ public class BattleSystem : MonoBehaviour
     bool betaAlive = true;
     int betaCount;
     bool elderAlive = true;
+    bool secondaryAttack;
+    bool damageIncreased;
 
     int hitSuccess = 80;
+    int attackDamage;
 
     public List<Unit> playerWolves = new List<Unit>();
     public List<Unit> enemyWolves = new List<Unit>();
 
-    private void Awake()
-    {
-
-
-    }
+   
     void Start()
     {
         state = BattleState.START;
         StartCoroutine(SetupBattle());
-
+        
 
         alphaHUD.transform.parent = alphaUnit.transform;
         betaHUD.transform.parent = betaUnit.transform;
-        elderHUD.transform.parent = betaUnit.transform;
+        elderHUD.transform.parent = elderUnit.transform;
 
         enemyAlphaHUD.transform.parent = enemyAlphaUnit.transform;
         enemyBetaHUD.transform.parent = enemyBetaUnit.transform;
         enemyElderHUD.transform.parent = enemyElderUnit.transform;
+
+        targets.SetActive(false);
+       
     }
+
 
 
     IEnumerator SetupBattle()
@@ -98,12 +104,21 @@ public class BattleSystem : MonoBehaviour
 
 
 
-    IEnumerator AlphaAttack()
+    IEnumerator AlphaAttack(Unit confirmedTarget)
     {
         if (CheckHit() == true)
         {
-            Unit target = PlayerChooseTarget();
-            bool isDead = target.TakeDamage(alphaUnit.attackDamage);
+            if (secondaryAttack)
+            {
+                attackDamage = alphaUnit.specialDamage;
+            }
+            else
+            {
+                attackDamage = alphaUnit.attackDamage;
+            }
+
+            Unit target = confirmedTarget;
+            bool isDead = target.TakeDamage(attackDamage);
             print(target.gameObject.name + " hit");
 
             target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
@@ -135,12 +150,20 @@ public class BattleSystem : MonoBehaviour
 
 
     }
-    IEnumerator BetaAttack()
+    IEnumerator BetaAttack(Unit confirmedTarget)
     {
         if (CheckHit() == true)
         {
-            Unit target = PlayerChooseTarget();
-            bool isDead = target.TakeDamage(betaUnit.attackDamage);
+            if (secondaryAttack)
+            {
+                attackDamage = betaUnit.specialDamage;
+            }
+            else
+            {
+                attackDamage = betaUnit.attackDamage;
+            }
+            Unit target = confirmedTarget;
+            bool isDead = target.TakeDamage(attackDamage);
 
             target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
             dialogueText.text = "The attack is successful";
@@ -170,12 +193,20 @@ public class BattleSystem : MonoBehaviour
 
 
     }
-    IEnumerator ElderAttack()
+    IEnumerator ElderAttack(Unit confirmedTarget)
     {
         if (CheckHit() == true)
         {
-            Unit target = PlayerChooseTarget();
-            bool isDead = target.TakeDamage(elderUnit.attackDamage);
+            if (secondaryAttack)
+            {
+                StartCoroutine(ElderBuff());
+            }
+            else
+            {
+                attackDamage = elderUnit.attackDamage;
+            }
+            Unit target = confirmedTarget;
+            bool isDead = target.TakeDamage(attackDamage);
 
 
             dialogueText.text = "Elder attack successful";
@@ -209,6 +240,26 @@ public class BattleSystem : MonoBehaviour
 
 
     }
+
+    IEnumerator ElderBuff()
+    {
+        if (damageIncreased == false)
+        {
+
+            alphaUnit.attackDamage = alphaUnit.attackDamage * 2;
+            betaUnit.attackDamage = betaUnit.attackDamage * 2;
+            elderUnit.attackDamage = elderUnit.attackDamage * 2;
+            damageIncreased = true;
+        }
+        else
+        {
+            dialogueText.text = "you cant do that right now";
+            yield return new WaitForSeconds(1f);
+
+
+        }
+    }
+
     IEnumerator EnemyTurn()
     {
 
@@ -316,11 +367,7 @@ public class BattleSystem : MonoBehaviour
 
     }
 
-    public Unit PlayerChooseTarget()
-    {
-        int wolfIndex = Random.Range(0, 3);
-        return enemyWolves[wolfIndex];
-    }
+   
 
     public Unit EnemyChooseTarget()
     {
@@ -368,22 +415,61 @@ public class BattleSystem : MonoBehaviour
     }
     public void AttackButton()
     {
+        secondaryAttack = false;
+        targets.SetActive(true);
+        dialogueText.text = "Choose a target";
+    }
+
+    public void SecondaryAttackButton()
+    {
+        if (state == BattleState.ELDERTURN)
+        {
+            secondaryAttack = true;
+
+        }
+        else
+        {
+            secondaryAttack = true;
+            targets.SetActive(true);
+            dialogueText.text = "Choose a target";
+        }
+    }
+
+    public void ChooseTarget(string targetName)
+    {
+        Unit confirmedTarget = null;
+        switch (targetName)
+        {
+            case "Alpha":
+                confirmedTarget = enemyAlphaUnit;
+                break;
+            case "Beta":
+                confirmedTarget = enemyBetaUnit;
+                break;
+            case "Elder":
+                confirmedTarget = enemyElderUnit;
+                break;
+
+        }
+
         if (state == BattleState.ALPHATURN)
         {
-            StartCoroutine(AlphaAttack());
+            targets.SetActive(false);
+            StartCoroutine(AlphaAttack(confirmedTarget));
+            
         }
         if (state == BattleState.BETATURN)
         {
-            StartCoroutine(BetaAttack());
+            targets.SetActive(false);
+            StartCoroutine(BetaAttack(confirmedTarget));
         }
         if (state == BattleState.ELDERTURN)
         {
-            StartCoroutine(ElderAttack());
+            targets.SetActive(false);
+            StartCoroutine(ElderAttack(confirmedTarget));
 
         }
-
     }
-
 
     void PlayerTurn()
     {
@@ -444,6 +530,8 @@ public class BattleSystem : MonoBehaviour
         enemyElderHUD.SetHUD(enemyElderUnit);
 
     }
+
+    
 
 
 }
