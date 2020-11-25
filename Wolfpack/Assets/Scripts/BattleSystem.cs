@@ -56,7 +56,7 @@ public class BattleSystem : MonoBehaviour
 
     private void Awake()
     {
-        
+
 
     }
     void Start()
@@ -74,13 +74,13 @@ public class BattleSystem : MonoBehaviour
         enemyElderHUD.transform.parent = enemyElderUnit.transform;
     }
 
-   
+
     IEnumerator SetupBattle()
     {
         SpawnPlayers();
         SpawnEnemy();
         SetupHUD();
-        
+
         dialogueText.text = "A wild " + enemyAlphaUnit.Name + " approaches";
 
         yield return new WaitForSeconds(2f);
@@ -106,7 +106,7 @@ public class BattleSystem : MonoBehaviour
             bool isDead = target.TakeDamage(alphaUnit.attackDamage);
             print(target.gameObject.name + " hit");
 
-            target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);   
+            target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
             dialogueText.text = "The attack is successful";
 
             yield return new WaitForSeconds(2f);
@@ -211,7 +211,7 @@ public class BattleSystem : MonoBehaviour
     }
     IEnumerator EnemyTurn()
     {
-        
+
         dialogueText.text = enemyAlphaUnit.Name + " attacks!";
 
         yield return new WaitForSeconds(1f);
@@ -247,7 +247,7 @@ public class BattleSystem : MonoBehaviour
     IEnumerator Enemy2Turn()
     {
         Debug.Log("HIT");
-        
+
         dialogueText.text = enemyAlphaUnit.Name + " attacks!";
 
         yield return new WaitForSeconds(1f);
@@ -282,7 +282,7 @@ public class BattleSystem : MonoBehaviour
     }
     IEnumerator Enemy3Turn()
     {
-        
+
         dialogueText.text = enemyAlphaUnit.Name + " attacks!";
 
         yield return new WaitForSeconds(1f);
@@ -352,7 +352,7 @@ public class BattleSystem : MonoBehaviour
         else { dialogueText.text = "youre out of wolves, you suck!"; }
 
     }
-    public void SpawnEnemy() 
+    public void SpawnEnemy()
     {
         GameObject enemyGO = Instantiate(enemyPrefab, enemyBattlePosition);
         enemyAlphaUnit = enemyGO.GetComponent<Unit>();
@@ -383,7 +383,7 @@ public class BattleSystem : MonoBehaviour
         }
 
     }
-   
+
 
     void PlayerTurn()
     {
@@ -414,17 +414,17 @@ public class BattleSystem : MonoBehaviour
 
     public bool CheckHit()
     {
-        
+
         int hitChance = Random.Range(1, 100);
         print(hitChance);
-        if  (hitChance <= hitSuccess) // if hit chance is lower than hit success, player hits 
+        if (hitChance <= hitSuccess) // if hit chance is lower than hit success, player hits 
         {
-           
+
             return true;
         }
         else
         {
-            
+
             return false;
         }
 
