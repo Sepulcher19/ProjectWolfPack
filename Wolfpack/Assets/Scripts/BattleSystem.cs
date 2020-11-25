@@ -35,7 +35,8 @@ public class BattleSystem : MonoBehaviour
     public BattleHUD enemyAlphaHUD;
     public BattleHUD enemyBetaHUD;
     public BattleHUD enemyElderHUD;
-
+    [Header("Particles")]
+    public ParticleSystem damageParticle;
 
     Unit alphaUnit;
     Unit betaUnit;
@@ -55,6 +56,7 @@ public class BattleSystem : MonoBehaviour
     bool damageIncreased;
 
     int hitSuccess = 80;
+    
     int attackDamage;
 
     public List<Unit> playerWolves = new List<Unit>();
@@ -106,138 +108,164 @@ public class BattleSystem : MonoBehaviour
 
     IEnumerator AlphaAttack(Unit confirmedTarget)
     {
-        if (CheckHit() == true)
+        if (!alphaUnit.isDead)
         {
-            if (secondaryAttack)
+            if (CheckHit() == true)
             {
-                attackDamage = alphaUnit.specialDamage;
+
+                if (secondaryAttack)
+                {
+                    attackDamage = alphaUnit.specialDamage;
+                }
+                else
+                {
+                    attackDamage = alphaUnit.attackDamage;
+                }
+
+                Unit target = confirmedTarget;
+                target.TakeDamage(attackDamage);
+                DamageParticle(target);
+
+
+
+                print(target.gameObject.name + " hit");
+                target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
+                dialogueText.text = "The attack is successful";
+
+                yield return new WaitForSeconds(2f);
+
+
+                if (target.isDead)
+                {
+                    state = BattleState.WON;
+                    EndBattle();
+                }
+                else
+                {
+                    state = BattleState.BETATURN;
+                    BetaTurn();
+                }
             }
             else
             {
-                attackDamage = alphaUnit.attackDamage;
-            }
+                dialogueText.text = "The attack missed...";
 
-            Unit target = confirmedTarget;
-            bool isDead = target.TakeDamage(attackDamage);
-            print(target.gameObject.name + " hit");
+                yield return new WaitForSeconds(2f);
 
-            target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
-            dialogueText.text = "The attack is successful";
-
-            yield return new WaitForSeconds(2f);
-
-
-            if (isDead)
-            {
-                state = BattleState.WON;
-                EndBattle();
-            }
-            else
-            {
                 state = BattleState.BETATURN;
                 BetaTurn();
             }
         }
         else
         {
-            dialogueText.text = "The attack missed...";
-
-            yield return new WaitForSeconds(2f);
-
             state = BattleState.BETATURN;
             BetaTurn();
         }
 
-
     }
     IEnumerator BetaAttack(Unit confirmedTarget)
     {
-        if (CheckHit() == true)
+        if (!betaUnit.isDead)
         {
-            if (secondaryAttack)
+            if (CheckHit() == true)
             {
-                attackDamage = betaUnit.specialDamage;
+                if (secondaryAttack)
+                {
+                    attackDamage = betaUnit.specialDamage;
+                }
+                else
+                {
+                    attackDamage = betaUnit.attackDamage;
+                }
+                Unit target = confirmedTarget;
+                target.TakeDamage(attackDamage);
+                DamageParticle(target);
+                target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
+                dialogueText.text = "The attack is successful";
+
+                yield return new WaitForSeconds(2f);
+
+                if (target.isDead)
+                {
+                    state = BattleState.WON;
+                    EndBattle();
+                }
+                else
+                {
+                    state = BattleState.ELDERTURN;
+                    ElderTurn();
+                }
             }
             else
             {
-                attackDamage = betaUnit.attackDamage;
-            }
-            Unit target = confirmedTarget;
-            bool isDead = target.TakeDamage(attackDamage);
+                dialogueText.text = "The attack missed...";
 
-            target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
-            dialogueText.text = "The attack is successful";
+                yield return new WaitForSeconds(2f);
 
-            yield return new WaitForSeconds(2f);
-
-            if (isDead)
-            {
-                state = BattleState.WON;
-                EndBattle();
-            }
-            else
-            {
                 state = BattleState.ELDERTURN;
                 ElderTurn();
             }
+
         }
         else
         {
-            dialogueText.text = "The attack missed...";
-
-            yield return new WaitForSeconds(2f);
-
             state = BattleState.ELDERTURN;
             ElderTurn();
         }
-
-
     }
     IEnumerator ElderAttack(Unit confirmedTarget)
     {
-        if (CheckHit() == true)
+        if (!elderUnit.isDead)
         {
-            if (secondaryAttack)
+
+
+            if (CheckHit() == true)
             {
-                StartCoroutine(ElderBuff());
-            }
-            else
-            {
+
                 attackDamage = elderUnit.attackDamage;
+
+                Unit target = confirmedTarget;
+                target.TakeDamage(attackDamage);
+                DamageParticle(target);
+
+                dialogueText.text = "Elder attack successful";
+
+                target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
+
+
+                yield return new WaitForSeconds(2f);
+
+                if (target.isDead)
+                {
+                    print("isdead");
+                    state = BattleState.WON;
+                    EndBattle();
+                }
+                else
+                {
+                    state = BattleState.ENEMYTURN;
+
+                    StartCoroutine(EnemyTurn());
+                }
+
             }
-            Unit target = confirmedTarget;
-            bool isDead = target.TakeDamage(attackDamage);
 
 
-            dialogueText.text = "Elder attack successful";
-
-            target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
-
-
-            yield return new WaitForSeconds(2f);
-
-            if (isDead)
+            else// if it misses
             {
-                print("isdead");
-                state = BattleState.WON;
-                EndBattle();
-            }
-            else
-            {
+                dialogueText.text = "The attack missed...";
+                yield return new WaitForSeconds(2f);
+
                 state = BattleState.ENEMYTURN;
-
                 StartCoroutine(EnemyTurn());
             }
+            
         }
-        else// if it misses
+        else
         {
-            dialogueText.text = "The attack missed...";
-            yield return new WaitForSeconds(2f);
-
             state = BattleState.ENEMYTURN;
             StartCoroutine(EnemyTurn());
         }
-
 
     }
 
@@ -250,6 +278,13 @@ public class BattleSystem : MonoBehaviour
             betaUnit.attackDamage = betaUnit.attackDamage * 2;
             elderUnit.attackDamage = elderUnit.attackDamage * 2;
             damageIncreased = true;
+
+            dialogueText.text = "your team was buffed!";
+
+            yield return new WaitForSeconds(1f);
+
+            state = BattleState.ENEMYTURN;
+            StartCoroutine(EnemyTurn());
         }
         else
         {
@@ -262,109 +297,131 @@ public class BattleSystem : MonoBehaviour
 
     IEnumerator EnemyTurn()
     {
-
-        dialogueText.text = enemyAlphaUnit.Name + " attacks!";
-
-        yield return new WaitForSeconds(1f);
-        if (CheckHit() == true)
+        if (!enemyAlphaUnit.isDead)
         {
-
-            Unit target = EnemyChooseTarget();
-            bool isDead = target.TakeDamage(enemyAlphaUnit.attackDamage);
-
-            target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
+            dialogueText.text = enemyAlphaUnit.Name + " attacks!";
 
             yield return new WaitForSeconds(1f);
-
-            if (isDead)
+            if (CheckHit() == true)
             {
-                state = BattleState.LOST;
-                EndBattle();
+
+                Unit target = EnemyChooseTarget();
+                target.TakeDamage(enemyAlphaUnit.attackDamage);
+                DamageParticle(target);
+                target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
+
+                yield return new WaitForSeconds(1f);
+
+                if (target.isDead)
+                {
+                    state = BattleState.LOST;
+                    EndBattle();
+                }
+                else
+                {
+                    state = BattleState.ENEMYTURN2;
+                    StartCoroutine(EnemyBetaTurn());
+                }
             }
             else
             {
+                dialogueText.text = "The attack missed...";
                 state = BattleState.ENEMYTURN2;
-                StartCoroutine(Enemy2Turn());
+                StartCoroutine(EnemyBetaTurn());
             }
         }
         else
         {
-            dialogueText.text = "The attack missed...";
             state = BattleState.ENEMYTURN2;
-            StartCoroutine(Enemy2Turn());
+            StartCoroutine(EnemyBetaTurn());
         }
-
     }
-    IEnumerator Enemy2Turn()
+
+
+    IEnumerator EnemyBetaTurn()
     {
-        Debug.Log("HIT");
-
-        dialogueText.text = enemyAlphaUnit.Name + " attacks!";
-
-        yield return new WaitForSeconds(1f);
-        if (CheckHit() == true)
+        if (!enemyBetaUnit.isDead)
         {
-            Unit target = EnemyChooseTarget();
+            Debug.Log("HIT");
 
-            bool isDead = target.TakeDamage(enemyBetaUnit.attackDamage);
-
-            target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
+            dialogueText.text = enemyAlphaUnit.Name + " attacks!";
 
             yield return new WaitForSeconds(1f);
-
-            if (isDead)
+            if (CheckHit() == true)
             {
-                state = BattleState.LOST;
-                EndBattle();
+                Unit target = EnemyChooseTarget();
+
+                target.TakeDamage(enemyBetaUnit.attackDamage);
+                DamageParticle(target);
+                target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
+
+                yield return new WaitForSeconds(1f);
+
+                if (target.isDead)
+                {
+                    state = BattleState.LOST;
+                    EndBattle();
+                }
+                else
+                {
+                    state = BattleState.ENEMYTURN3;
+                    StartCoroutine(EnemyElderTurn());
+                }
             }
             else
             {
+                dialogueText.text = "The attack missed...";
                 state = BattleState.ENEMYTURN3;
-                StartCoroutine(Enemy3Turn());
+                StartCoroutine(EnemyElderTurn());
             }
         }
         else
         {
-            dialogueText.text = "The attack missed...";
-            state = BattleState.ALPHATURN;
-            StartCoroutine(Enemy3Turn());
+            state = BattleState.ENEMYTURN3;
+            StartCoroutine(EnemyElderTurn());
         }
-
     }
-    IEnumerator Enemy3Turn()
+    IEnumerator EnemyElderTurn()
     {
-
-        dialogueText.text = enemyAlphaUnit.Name + " attacks!";
-
-        yield return new WaitForSeconds(1f);
-        if (CheckHit() == true)
+        if (enemyElderUnit.isDead)
         {
-            Unit target = EnemyChooseTarget();
 
-            bool isDead = alphaUnit.TakeDamage(enemyElderUnit.attackDamage);
-
-            target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
+            dialogueText.text = enemyAlphaUnit.Name + " attacks!";
 
             yield return new WaitForSeconds(1f);
-
-            if (isDead)
+            if (CheckHit() == true)
             {
-                state = BattleState.LOST;
-                EndBattle();
+                Unit target = EnemyChooseTarget();
+
+                target.TakeDamage(enemyElderUnit.attackDamage);
+                DamageParticle(target);
+                target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
+
+                yield return new WaitForSeconds(1f);
+
+                if (target.isDead)
+                {
+                    state = BattleState.LOST;
+                    EndBattle();
+                }
+                else
+                {
+                    state = BattleState.ALPHATURN;
+                    PlayerTurn();
+                }
             }
             else
             {
+                dialogueText.text = "The attack missed...";
                 state = BattleState.ALPHATURN;
                 PlayerTurn();
             }
         }
         else
         {
-            dialogueText.text = "The attack missed...";
             state = BattleState.ALPHATURN;
             PlayerTurn();
         }
-
     }
 
    
@@ -372,7 +429,7 @@ public class BattleSystem : MonoBehaviour
     public Unit EnemyChooseTarget()
     {
         int wolfIndex = Random.Range(0, 3);
-        return enemyWolves[wolfIndex];
+        return playerWolves[wolfIndex];
     }
 
 
@@ -425,6 +482,7 @@ public class BattleSystem : MonoBehaviour
         if (state == BattleState.ELDERTURN)
         {
             secondaryAttack = true;
+            StartCoroutine(ElderBuff());
 
         }
         else
@@ -502,7 +560,7 @@ public class BattleSystem : MonoBehaviour
     {
 
         int hitChance = Random.Range(1, 100);
-        print(hitChance);
+        
         if (hitChance <= hitSuccess) // if hit chance is lower than hit success, player hits 
         {
 
@@ -515,6 +573,7 @@ public class BattleSystem : MonoBehaviour
         }
 
     }
+
 
 
 
@@ -531,7 +590,11 @@ public class BattleSystem : MonoBehaviour
 
     }
 
-    
+    public void DamageParticle(Unit target)
+    {
+        var particleObject = Instantiate(damageParticle, target.transform.position, Quaternion.identity);
+       // Destroy(particleObject, particleObject.time);
+    }
 
 
 }

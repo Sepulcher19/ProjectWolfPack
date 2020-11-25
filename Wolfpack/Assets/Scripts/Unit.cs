@@ -16,6 +16,8 @@ public class Unit : MonoBehaviour
     public int specialDamage;
     public int specialCooldown;
 
+    public bool isDead = false;
+
     private void Awake()
     {
         currentHP = maxHP;
@@ -23,14 +25,14 @@ public class Unit : MonoBehaviour
 
 
 
-    public bool TakeDamage(int dmg)
+    public void TakeDamage(int dmg)
     {
         currentHP -= dmg;
 
         if (currentHP <= 0)
-            return true;
+            isDead = true;
         else
-            return false;
+            isDead = false;
     }
 
     private void Update()
