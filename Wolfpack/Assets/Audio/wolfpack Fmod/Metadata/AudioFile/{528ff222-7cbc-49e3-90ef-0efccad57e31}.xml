@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.01.00">
+	<object class="AudioFile" id="{528ff222-7cbc-49e3-90ef-0efccad57e31}">
+		<property name="assetPath">
+			<value>reverb clicks.mp3</value>
+		</property>
+		<property name="isStreaming">
+			<value>true</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>44.0999985</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>58.592653061224489</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{cc296a5c-ac6f-4e72-a3de-e863b32536a3}</destination>
+		</relationship>
+	</object>
+</objects>

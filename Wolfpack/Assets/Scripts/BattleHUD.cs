@@ -28,17 +28,19 @@ public class BattleHUD : MonoBehaviour
         hpSlider.maxValue = unit.maxHP;
         hpSlider.value = unit.currentHP;
 
-        hpHealth.text = hpSlider.maxValue + "/" + hpSlider.value;
+        hpHealth.text = hpSlider.value + "/" + hpSlider.maxValue;
     }
-    public void SetHP(int hp)
+    public void SetHP(int hp,int hpMax)
     {
+        hpSlider.maxValue = hpMax;
         hpSlider.value = hp;
-        hpHealth.text = hpSlider.maxValue + "/" + hpSlider.value;
+        hpHealth.text = hpSlider.value + "/" + hpSlider.maxValue;
     }
 
     public void SetLevel(int level)
     {
         levelText.text = "Lv" + level;
+       
     }
 
 

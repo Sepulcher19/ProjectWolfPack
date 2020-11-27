@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.01.00">
+	<object class="AudioFile" id="{d224b6e0-4a90-4c96-8b32-c34e6458e7f6}">
+		<property name="assetPath">
+			<value>distort hit.mp3</value>
+		</property>
+		<property name="isStreaming">
+			<value>true</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>44.0999985</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>58.592653061224489</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{cc296a5c-ac6f-4e72-a3de-e863b32536a3}</destination>
+		</relationship>
+	</object>
+</objects>

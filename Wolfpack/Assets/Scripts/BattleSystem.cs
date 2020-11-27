@@ -25,6 +25,8 @@ public class BattleSystem : MonoBehaviour
     public Transform enemy2BattlePosition;
     public Transform enemy3BattlePosition;
 
+    
+
     public BattleState state;
 
     [Header("Player HUD")]
@@ -38,6 +40,23 @@ public class BattleSystem : MonoBehaviour
     [Header("Particles")]
     public ParticleSystem damageParticle;
 
+    [Header("Animators")]
+    public Animator alphaAnim;
+    public Animator betaAnim;
+    public Animator elderAnim;
+
+    public Animator enemyAlphaAnim;
+    public Animator enemyBetaAnim;
+    public Animator enemyElderAnim;
+
+
+
+    [Header("Other")]
+    public Text dialogueText;
+    public AttackButton primaryButton;
+    public AttackButton secondaryButton;
+    public AudioManager audioManager;
+
     Unit alphaUnit;
     Unit betaUnit;
     Unit elderUnit;
@@ -45,7 +64,6 @@ public class BattleSystem : MonoBehaviour
     Unit enemyBetaUnit;
     Unit enemyElderUnit;
 
-    public Text dialogueText;
 
 
     bool alphaAlive = true;
@@ -54,14 +72,17 @@ public class BattleSystem : MonoBehaviour
     bool elderAlive = true;
     bool secondaryAttack;
     bool damageIncreased;
-
+    bool firstAudioChange = false;
+   
+   
     int hitSuccess = 80;
-    int critSuccess = 95;
+    
 
     int attackDamage;
 
     public List<Unit> playerWolves = new List<Unit>();
     public List<Unit> enemyWolves = new List<Unit>();
+    public List<Unit> woundedWolves = new List<Unit>();
 
 
     void Start()
@@ -80,9 +101,16 @@ public class BattleSystem : MonoBehaviour
 
         targets.SetActive(false);
 
+        alphaAnim = alphaUnit.GetComponent<Animator>();
+        betaAnim = betaUnit.GetComponent<Animator>();
+        elderAnim = elderUnit.GetComponent<Animator>();
+
+        enemyAlphaAnim = enemyAlphaUnit.GetComponent<Animator>();
+        enemyBetaAnim = enemyBetaUnit.GetComponent<Animator>();
+        enemyElderAnim = enemyElderUnit.GetComponent<Animator>();
     }
 
-
+    //LOL WUB 
 
     IEnumerator SetupBattle()
     {
@@ -129,6 +157,7 @@ public class BattleSystem : MonoBehaviour
     IEnumerator AlphaAttack(Unit confirmedTarget)
     {
         CheckWin();
+        WoundAll();
         if (!alphaUnit.isDead)
         {
             if (CheckHit() == true)
@@ -137,12 +166,13 @@ public class BattleSystem : MonoBehaviour
 
                 Unit target = confirmedTarget;
                 target.TakeDamage(alphaUnit.attackDamage);
+                alphaAnim.SetTrigger("Attack");
                 DamageParticle(target);
 
 
 
                 print(target.gameObject.name + " hit");
-                target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
+                target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP , target.maxHP);
                 dialogueText.text = "The attack is successful";
 
                 yield return new WaitForSeconds(2f);
@@ -183,41 +213,20 @@ public class BattleSystem : MonoBehaviour
 
     }
 
-    IEnumerator SummonBeta()
-    {
-
-        if (betaUnit.level < 10)
-        {
-            var newBetas = Random.Range(1, 3);
-            dialogueText.text = newBetas + " more wolves join your struggle";
-            betaUnit.SetLevel(newBetas);
-
-
-
-            yield return new WaitForSeconds(1f);
-            state = BattleState.BETATURN;
-            BetaTurn();
-        }
-        else
-        {
-            dialogueText.text = "Large packs are uncontrollable, try something else";
-            yield return new WaitForSeconds(1f);
-            AlphaTurn();
-
-        }
-    }
-
-
     IEnumerator BetaAttack(Unit confirmedTarget)
     {
         CheckWin();
+        WoundAll();
         if (!betaUnit.isDead)
         {
             if (CheckHit() == true)
             {
                 if (secondaryAttack)
                 {
+                    
                     attackDamage = betaUnit.specialDamage;
+                    betaUnit.TakeDamage(6 * betaUnit.level);
+                    betaUnit.GetComponentInChildren<BattleHUD>().SetHP(betaUnit.currentHP, betaUnit.maxHP);
                 }
                 else
                 {
@@ -225,8 +234,9 @@ public class BattleSystem : MonoBehaviour
                 }
                 Unit target = confirmedTarget;
                 target.TakeDamage(attackDamage);
+                betaAnim.SetTrigger("Attack");
                 DamageParticle(target);
-                target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
+                target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP, target.maxHP);
                 dialogueText.text = "The attack is successful";
 
                 yield return new WaitForSeconds(2f);
@@ -267,6 +277,7 @@ public class BattleSystem : MonoBehaviour
     IEnumerator ElderAttack(Unit confirmedTarget)
     {
         CheckWin();
+        WoundAll();
         if (!elderUnit.isDead)
         {
 
@@ -278,11 +289,13 @@ public class BattleSystem : MonoBehaviour
 
                 Unit target = confirmedTarget;
                 target.TakeDamage(attackDamage);
+                woundedWolves.Add(target);
+                elderAnim.SetTrigger("Attack");
                 DamageParticle(target);
 
                 dialogueText.text = "Elder attack successful";
 
-                target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
+                target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP, target.maxHP);
 
 
                 yield return new WaitForSeconds(2f);
@@ -333,36 +346,16 @@ public class BattleSystem : MonoBehaviour
         }
 
     }
-
-    IEnumerator ElderBuff()
-    {
-        if (damageIncreased == false)
-        {
-
-            alphaUnit.attackDamage = alphaUnit.attackDamage * 2;
-            betaUnit.attackDamage = betaUnit.attackDamage * 2;
-            elderUnit.attackDamage = elderUnit.attackDamage * 2;
-            damageIncreased = true;
-
-            dialogueText.text = "your team was buffed!";
-
-            yield return new WaitForSeconds(1f);
-
-            state = BattleState.ENEMYTURN;
-            StartCoroutine(EnemyTurn());
-        }
-        else
-        {
-            dialogueText.text = "you cant do that right now";
-            yield return new WaitForSeconds(1f);
-
-
-        }
-    }
-
     IEnumerator EnemyTurn()
     {
+        if (!firstAudioChange)
+        {
+            audioManager.IncreaseParameter();
+            firstAudioChange = true; 
+        }
+        WoundAll();
         CheckWin();
+      
         if (!enemyAlphaUnit.isDead)
         {
             dialogueText.text = enemyAlphaUnit.Name + " attacks!";
@@ -373,8 +366,9 @@ public class BattleSystem : MonoBehaviour
 
                 Unit target = EnemyChooseTarget();
                 target.TakeDamage(enemyAlphaUnit.attackDamage);
+                enemyAlphaAnim.SetTrigger("Attack");
                 DamageParticle(target);
-                target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
+                target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP,target.maxHP);
 
                 yield return new WaitForSeconds(1f);
 
@@ -408,11 +402,11 @@ public class BattleSystem : MonoBehaviour
             StartCoroutine(EnemyBetaTurn());
         }
     }
-
-
     IEnumerator EnemyBetaTurn()
     {
         CheckWin();
+        WoundAll();
+        
         if (!enemyBetaUnit.isDead)
         {
 
@@ -425,8 +419,9 @@ public class BattleSystem : MonoBehaviour
                 Unit target = EnemyChooseTarget();
 
                 target.TakeDamage(enemyBetaUnit.attackDamage);
+                enemyBetaAnim.SetTrigger("Attack");
                 DamageParticle(target);
-                target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
+                target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP,target.maxHP);
 
                 yield return new WaitForSeconds(1f);
 
@@ -463,7 +458,8 @@ public class BattleSystem : MonoBehaviour
     IEnumerator EnemyElderTurn()
     {
         CheckWin();
-
+        WoundAll();
+        
         if (!enemyElderUnit.isDead)
         {
 
@@ -475,8 +471,10 @@ public class BattleSystem : MonoBehaviour
                 Unit target = EnemyChooseTarget();
 
                 target.TakeDamage(enemyElderUnit.attackDamage);
+                woundedWolves.Add(target);
+                enemyElderAnim.SetTrigger("Attack");
                 DamageParticle(target);
-                target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP);
+                target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP, target.maxHP);
 
                 yield return new WaitForSeconds(1f);
 
@@ -509,9 +507,6 @@ public class BattleSystem : MonoBehaviour
             AlphaTurn();
         }
     }
-
-
-
     public Unit EnemyChooseTarget()
     {
         int wolfIndex = Random.Range(0, 3);
@@ -563,6 +558,7 @@ public class BattleSystem : MonoBehaviour
         dialogueText.text = "Choose a target";
     }
 
+    
     public void SecondaryAttackButton()
     {
         if (state == BattleState.ELDERTURN)
@@ -622,15 +618,31 @@ public class BattleSystem : MonoBehaviour
 
     void AlphaTurn()
     {
+        
+       
         dialogueText.text = "Alpha ready to attack!";
+        primaryButton.UpdateText("Bite");
+        secondaryButton.UpdateText("Summon");
+        primaryButton.playerturn = 1;
+        secondaryButton.playerturn = 1;
     }
     void BetaTurn()
     {
+        
         dialogueText.text = "Beta ready to attack!";
+        primaryButton.UpdateText("Hunt");
+        secondaryButton.UpdateText("Rush");
+        primaryButton.playerturn = 2;
+        secondaryButton.playerturn = 2;
     }
     void ElderTurn()
     {
+       
         dialogueText.text = "Elder ready to attack!";
+        primaryButton.UpdateText("Wound");
+        secondaryButton.UpdateText("Howl");
+        primaryButton.playerturn = 3;
+        secondaryButton.playerturn = 3;
     }
     void EndBattle()
     {
@@ -666,6 +678,85 @@ public class BattleSystem : MonoBehaviour
     }
 
 
+    public void WoundAll()
+    {
+        if (woundedWolves != null)
+        {
+
+            foreach (Unit wounded in woundedWolves)
+            {
+                if (wounded.woundCounter > 0)
+                {
+                    wounded.woundCounter--;
+                    wounded.TakeDamage(5);
+                    wounded.GetComponentInChildren<BattleHUD>().SetHP(wounded.currentHP, wounded.maxHP);
+                    DamageParticle(wounded);
+                }
+                else
+                {
+                    woundedWolves.Remove(wounded);
+                }
+
+            }
+
+        }
+        else
+        {
+            return;
+        }
+    }
+
+
+    IEnumerator ElderBuff()
+    {
+        if (damageIncreased == false)
+        {
+
+            alphaUnit.attackDamage = alphaUnit.attackDamage * 2;
+            betaUnit.attackDamage = betaUnit.attackDamage * 2;
+            elderUnit.attackDamage = elderUnit.attackDamage * 2;
+            damageIncreased = true;
+
+            dialogueText.text = "your team was buffed!";
+
+            yield return new WaitForSeconds(1f);
+
+            state = BattleState.ENEMYTURN;
+            StartCoroutine(EnemyTurn());
+        }
+        else
+        {
+            dialogueText.text = "you cant do that right now";
+            yield return new WaitForSeconds(1f);
+
+
+        }
+    }
+
+
+    IEnumerator SummonBeta()
+    {
+
+        if (betaUnit.level < 10)
+        {
+            var newBetas = Random.Range(1, 3);
+            dialogueText.text = newBetas + " more wolves join your struggle";
+            betaUnit.SetLevel(newBetas);
+
+
+
+            yield return new WaitForSeconds(1f);
+            state = BattleState.BETATURN;
+            BetaTurn();
+        }
+        else
+        {
+            dialogueText.text = "Large packs are uncontrollable, try something else";
+            yield return new WaitForSeconds(1f);
+            AlphaTurn();
+
+        }
+    }
 
 
     public void SetupHUD()
@@ -686,6 +777,8 @@ public class BattleSystem : MonoBehaviour
         var particleObject = Instantiate(damageParticle, target.transform.position, Quaternion.identity);
         // Destroy(particleObject, particleObject.time);
     }
+
+
 
 
 }

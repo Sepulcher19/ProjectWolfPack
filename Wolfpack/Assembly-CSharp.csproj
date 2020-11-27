@@ -63,9 +63,37 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\AttackButton.cs" />
+    <Compile Include="Assets\Scripts\AudioManager.cs" />
     <Compile Include="Assets\Scripts\BattleHUD.cs" />
     <Compile Include="Assets\Scripts\BattleSystem.cs" />
+    <Compile Include="Assets\Scripts\DamageText.cs" />
     <Compile Include="Assets\Scripts\Unit.cs" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\Platform\{649b253a-c53b-48cd-baaf-50c2f729f950}.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\Event\{3f237214-71c4-4c90-b2a4-ce1cb4d2a619}.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\AudioFile\{04e2e348-924b-4bac-ab76-07e4142e4610}.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\EffectPresetFolder\{578bda7c-ecd1-439e-a339-b5f03cdda5c0}.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\AudioFile\{7677dd2d-ca6d-4d27-b944-3abf962c7f38}.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\Master.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\EncodingSetting\{7c6250ac-196a-47e5-ac4d-9b6b5f7c273f}.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\AudioFile\{528ff222-7cbc-49e3-90ef-0efccad57e31}.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\AudioFile\{4ca14f7b-eff2-4a05-8668-6f7421a96629}.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\Bank\{0eee0d6c-9bee-4036-a53c-4b6bc9807d68}.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\Asset\{cc296a5c-ac6f-4e72-a3de-e863b32536a3}.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\ProfilerFolder\{22fc4dad-a381-4213-999d-8995f6f0f8e5}.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\Return\{8c36f571-f469-43d6-986b-adb8a3c780a3}.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\AudioFile\{d6e552cd-0908-42f6-a6aa-9a806b2a9c01}.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\EventFolder\{06cc56e7-3cef-46e6-8172-8a5c59a381c6}.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\ParameterPreset\{f7ed228b-1c4f-4f9a-a894-b82eea836f76}.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\Tags.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\AudioFile\{a512b927-29ca-41fe-8f0d-7015a457c4ec}.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\Workspace.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\SandboxFolder\{e112ba44-115b-4072-853d-058e8b1d11e4}.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\Mixer.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\AudioFile\{d224b6e0-4a90-4c96-8b32-c34e6458e7f6}.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\ParameterPresetFolder\{0a52f9ca-de21-49a9-8681-077ee47e3103}.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\SnapshotGroup\{add035b9-5d16-4f47-872c-6e58b6d0a24f}.xml" />
+    <None Include="Assets\Audio\wolfpack Fmod\Metadata\BankFolder\{d8f4c1fd-171c-418b-a83c-845afe16d19f}.xml" />
     <Reference Include="UnityEngine">
       <HintPath>C:/Program Files/Unity/Hub/Editor/2019.4.1f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
     </Reference>
@@ -676,7 +704,24 @@
       <HintPath>C:/Users/User/Desktop/Game Dev/Repos/Uni/WolfPack/Wolfpack/Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <ItemGroup></ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="FMODUnity.csproj">
+      <Project>{DA0EC28F-F9E6-3323-346D-4DED41B0C4EF}</Project>
+      <Name>FMODUnity</Name>
+    </ProjectReference>
+    <ProjectReference Include="FMODUnityResonance.csproj">
+      <Project>{2553462C-3E1C-F058-3096-55BDC49B842F}</Project>
+      <Name>FMODUnityResonance</Name>
+    </ProjectReference>
+    <ProjectReference Include="FMODUnityResonanceEditor.csproj">
+      <Project>{245B8428-8848-4A4F-B4D5-3B109833B16C}</Project>
+      <Name>FMODUnityResonanceEditor</Name>
+    </ProjectReference>
+    <ProjectReference Include="FMODUnityEditor.csproj">
+      <Project>{AE80948A-F748-9912-487F-9B64D2755D49}</Project>
+      <Name>FMODUnityEditor</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

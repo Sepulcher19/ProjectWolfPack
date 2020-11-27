@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7557902255747039808}
   - component: {fileID: 1214914641746464845}
+  - component: {fileID: 2263286518656963819}
   m_Layer: 0
   m_Name: Enemy Alpha
   m_TagString: Untagged
@@ -45,14 +46,36 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Name: Enemy Alpha
-  count: 1
   level: 1
   maxHP: 100
   currentHP: 100
-  attackDamage: 1
+  attackDamage: 20
   specialDamage: 0
   specialCooldown: 0
   isDead: 0
+  wounded: 0
+  woundCounter: 3
+  damageTextPrefab: {fileID: 5079874756616159888, guid: ba21452ea215d14409f0bbc5142cac93,
+    type: 3}
+--- !u!95 &2263286518656963819
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 709465029555577992}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 584ee8527ca6b6f4b92bb0469f1ce6bd, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &7025230428181708983
 GameObject:
   m_ObjectHideFlags: 0
@@ -124,7 +147,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 18d7bca06e705c345a1b1bdd717e0c96, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.5471698, g: 0.5471698, b: 0.5471698, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

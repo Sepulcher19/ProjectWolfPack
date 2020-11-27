@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1890422130295996820}
   - component: {fileID: 1890422130295996821}
   - component: {fileID: 7059652353845110603}
+  - component: {fileID: 5138631448305265187}
   m_Layer: 0
   m_Name: Alpha
   m_TagString: Untagged
@@ -72,7 +73,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 5be37240d17c7d74ba1be1f21c65c0c3, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.5471698, g: 0.5471698, b: 0.5471698, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -102,3 +103,26 @@ MonoBehaviour:
   specialDamage: 0
   specialCooldown: 0
   isDead: 0
+  wounded: 0
+  woundCounter: 3
+  damageTextPrefab: {fileID: 5079874756616159888, guid: ba21452ea215d14409f0bbc5142cac93,
+    type: 3}
+--- !u!95 &5138631448305265187
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1890422130295996823}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 54c203c6dac496f43b0123bad78e4f3c, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
