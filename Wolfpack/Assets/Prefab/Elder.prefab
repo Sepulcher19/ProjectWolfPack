@@ -95,10 +95,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Name: Elder
-  count: 1
   level: 0
-  maxHP: 10
-  currentHP: 10
+  maxHP: 60
+  currentHP: 60
   attackDamage: 5
   specialDamage: 0
   specialCooldown: 0

@@ -6,7 +6,7 @@ public class Unit : MonoBehaviour
 {
     [Header("Overview")]
     public string Name;
-    public int count;
+    
     public int level;
     [Header("Health")]
     public int maxHP;
@@ -21,6 +21,7 @@ public class Unit : MonoBehaviour
     private void Awake()
     {
         currentHP = maxHP;
+        level = 1;
     }
 
 
@@ -35,10 +36,14 @@ public class Unit : MonoBehaviour
             isDead = false;
     }
 
-    private void Update()
+  
+    public void SetLevel(int addedLevel)
     {
-        attackDamage = attackDamage * count;
-        specialDamage = attackDamage * count;
+        level += addedLevel;
+        GetComponentInChildren<BattleHUD>().SetLevel(level);
+
+        attackDamage *= level;
+        specialDamage *= level;
     }
 
 }

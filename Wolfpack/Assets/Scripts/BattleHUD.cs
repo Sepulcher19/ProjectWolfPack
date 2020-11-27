@@ -8,7 +8,7 @@ public class BattleHUD : MonoBehaviour
     public Text levelText;
 
     public Slider hpSlider;
-
+    public Text hpHealth;
 
     // Start is called before the first frame update
     void Start()
@@ -27,10 +27,19 @@ public class BattleHUD : MonoBehaviour
         levelText.text = "Lv" + unit.level;
         hpSlider.maxValue = unit.maxHP;
         hpSlider.value = unit.currentHP;
+
+        hpHealth.text = hpSlider.maxValue + "/" + hpSlider.value;
     }
     public void SetHP(int hp)
     {
         hpSlider.value = hp;
+        hpHealth.text = hpSlider.maxValue + "/" + hpSlider.value;
     }
+
+    public void SetLevel(int level)
+    {
+        levelText.text = "Lv" + level;
+    }
+
 
 }

@@ -16,7 +16,7 @@ public class BattleSystem : MonoBehaviour
     public GameObject enemy3Prefab;
     [Header("Targets")]
     public GameObject targets;
-    
+
     [Header("Battle Positions")]
     public Transform AlphaBattlePosition;
     public Transform BetaBattlePosition;
@@ -56,18 +56,19 @@ public class BattleSystem : MonoBehaviour
     bool damageIncreased;
 
     int hitSuccess = 80;
-    
+    int critSuccess = 95;
+
     int attackDamage;
 
     public List<Unit> playerWolves = new List<Unit>();
     public List<Unit> enemyWolves = new List<Unit>();
 
-   
+
     void Start()
     {
         state = BattleState.START;
         StartCoroutine(SetupBattle());
-        
+
 
         alphaHUD.transform.parent = alphaUnit.transform;
         betaHUD.transform.parent = betaUnit.transform;
@@ -78,7 +79,7 @@ public class BattleSystem : MonoBehaviour
         enemyElderHUD.transform.parent = enemyElderUnit.transform;
 
         targets.SetActive(false);
-       
+
     }
 
 
@@ -94,7 +95,7 @@ public class BattleSystem : MonoBehaviour
         yield return new WaitForSeconds(2f);
 
         state = BattleState.ALPHATURN;
-        PlayerTurn();
+        AlphaTurn();
     }
 
 
@@ -103,27 +104,39 @@ public class BattleSystem : MonoBehaviour
 
 
 
+    public bool CheckWin()
+    {
+        if (playerWolves.Count == 0)
+        {
 
+            state = BattleState.LOST;
+            EndBattle();
+            return true;
+        }
+        else if (enemyWolves.Count == 0)
+        {
+            state = BattleState.WON;
+            EndBattle();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
 
     IEnumerator AlphaAttack(Unit confirmedTarget)
     {
+        CheckWin();
         if (!alphaUnit.isDead)
         {
             if (CheckHit() == true)
             {
 
-                if (secondaryAttack)
-                {
-                    attackDamage = alphaUnit.specialDamage;
-                }
-                else
-                {
-                    attackDamage = alphaUnit.attackDamage;
-                }
 
                 Unit target = confirmedTarget;
-                target.TakeDamage(attackDamage);
+                target.TakeDamage(alphaUnit.attackDamage);
                 DamageParticle(target);
 
 
@@ -137,8 +150,14 @@ public class BattleSystem : MonoBehaviour
 
                 if (target.isDead)
                 {
-                    state = BattleState.WON;
-                    EndBattle();
+                    target.gameObject.SetActive(false);
+                    enemyWolves.Remove(target);
+                    if (!CheckWin())
+                    {
+                        state = BattleState.BETATURN;
+                        BetaTurn();
+                    }
+
                 }
                 else
                 {
@@ -163,8 +182,35 @@ public class BattleSystem : MonoBehaviour
         }
 
     }
+
+    IEnumerator SummonBeta()
+    {
+
+        if (betaUnit.level < 10)
+        {
+            var newBetas = Random.Range(1, 3);
+            dialogueText.text = newBetas + " more wolves join your struggle";
+            betaUnit.SetLevel(newBetas);
+
+
+
+            yield return new WaitForSeconds(1f);
+            state = BattleState.BETATURN;
+            BetaTurn();
+        }
+        else
+        {
+            dialogueText.text = "Large packs are uncontrollable, try something else";
+            yield return new WaitForSeconds(1f);
+            AlphaTurn();
+
+        }
+    }
+
+
     IEnumerator BetaAttack(Unit confirmedTarget)
     {
+        CheckWin();
         if (!betaUnit.isDead)
         {
             if (CheckHit() == true)
@@ -187,8 +233,13 @@ public class BattleSystem : MonoBehaviour
 
                 if (target.isDead)
                 {
-                    state = BattleState.WON;
-                    EndBattle();
+                    target.gameObject.SetActive(false);
+                    enemyWolves.Remove(target);
+                    if (!CheckWin())
+                    {
+                        state = BattleState.ELDERTURN;
+                        ElderTurn();
+                    }
                 }
                 else
                 {
@@ -215,6 +266,7 @@ public class BattleSystem : MonoBehaviour
     }
     IEnumerator ElderAttack(Unit confirmedTarget)
     {
+        CheckWin();
         if (!elderUnit.isDead)
         {
 
@@ -237,9 +289,22 @@ public class BattleSystem : MonoBehaviour
 
                 if (target.isDead)
                 {
-                    print("isdead");
-                    state = BattleState.WON;
-                    EndBattle();
+                    enemyWolves.Remove(target);
+                    target.gameObject.SetActive(false);
+                    enemyWolves.Remove(target);
+                    if (!CheckWin())
+                    {
+                        state = BattleState.ENEMYTURN;
+
+                        StartCoroutine(EnemyTurn());
+                    }
+                    else
+                    {
+
+                        state = BattleState.ENEMYTURN;
+
+                        StartCoroutine(EnemyTurn());
+                    }
                 }
                 else
                 {
@@ -259,7 +324,7 @@ public class BattleSystem : MonoBehaviour
                 state = BattleState.ENEMYTURN;
                 StartCoroutine(EnemyTurn());
             }
-            
+
         }
         else
         {
@@ -297,6 +362,7 @@ public class BattleSystem : MonoBehaviour
 
     IEnumerator EnemyTurn()
     {
+        CheckWin();
         if (!enemyAlphaUnit.isDead)
         {
             dialogueText.text = enemyAlphaUnit.Name + " attacks!";
@@ -314,8 +380,14 @@ public class BattleSystem : MonoBehaviour
 
                 if (target.isDead)
                 {
-                    state = BattleState.LOST;
-                    EndBattle();
+                   
+                    target.gameObject.SetActive(false);
+                    playerWolves.Remove(target);
+                    if (!CheckWin())
+                    {
+                        state = BattleState.ENEMYTURN2;
+                        StartCoroutine(EnemyBetaTurn());
+                    }
                 }
                 else
                 {
@@ -340,11 +412,12 @@ public class BattleSystem : MonoBehaviour
 
     IEnumerator EnemyBetaTurn()
     {
+        CheckWin();
         if (!enemyBetaUnit.isDead)
         {
-            Debug.Log("HIT");
 
-            dialogueText.text = enemyAlphaUnit.Name + " attacks!";
+
+            dialogueText.text = enemyBetaUnit.Name + " attacks!";
 
             yield return new WaitForSeconds(1f);
             if (CheckHit() == true)
@@ -359,8 +432,14 @@ public class BattleSystem : MonoBehaviour
 
                 if (target.isDead)
                 {
-                    state = BattleState.LOST;
-                    EndBattle();
+                    
+                    target.gameObject.SetActive(false);
+                    playerWolves.Remove(target);
+                    if (!CheckWin())
+                    {
+                        state = BattleState.ENEMYTURN2;
+                        StartCoroutine(EnemyBetaTurn());
+                    }
                 }
                 else
                 {
@@ -383,10 +462,12 @@ public class BattleSystem : MonoBehaviour
     }
     IEnumerator EnemyElderTurn()
     {
-        if (enemyElderUnit.isDead)
+        CheckWin();
+
+        if (!enemyElderUnit.isDead)
         {
 
-            dialogueText.text = enemyAlphaUnit.Name + " attacks!";
+            dialogueText.text = enemyElderUnit.Name + " attacks!";
 
             yield return new WaitForSeconds(1f);
             if (CheckHit() == true)
@@ -401,30 +482,35 @@ public class BattleSystem : MonoBehaviour
 
                 if (target.isDead)
                 {
-                    state = BattleState.LOST;
-                    EndBattle();
+                    target.gameObject.SetActive(false);
+                    playerWolves.Remove(target);
+                    if (!CheckWin())
+                    {
+                        state = BattleState.ALPHATURN;
+                        AlphaTurn();
+                    }
                 }
                 else
                 {
                     state = BattleState.ALPHATURN;
-                    PlayerTurn();
+                    AlphaTurn();
                 }
             }
             else
             {
                 dialogueText.text = "The attack missed...";
                 state = BattleState.ALPHATURN;
-                PlayerTurn();
-            }
+                AlphaTurn();
+            } 
         }
         else
         {
             state = BattleState.ALPHATURN;
-            PlayerTurn();
+            AlphaTurn();
         }
     }
 
-   
+
 
     public Unit EnemyChooseTarget()
     {
@@ -485,6 +571,11 @@ public class BattleSystem : MonoBehaviour
             StartCoroutine(ElderBuff());
 
         }
+        else if (state == BattleState.ALPHATURN)
+        {
+            secondaryAttack = true;
+            StartCoroutine(SummonBeta());
+        }
         else
         {
             secondaryAttack = true;
@@ -514,7 +605,7 @@ public class BattleSystem : MonoBehaviour
         {
             targets.SetActive(false);
             StartCoroutine(AlphaAttack(confirmedTarget));
-            
+
         }
         if (state == BattleState.BETATURN)
         {
@@ -529,7 +620,7 @@ public class BattleSystem : MonoBehaviour
         }
     }
 
-    void PlayerTurn()
+    void AlphaTurn()
     {
         dialogueText.text = "Alpha ready to attack!";
     }
@@ -560,7 +651,7 @@ public class BattleSystem : MonoBehaviour
     {
 
         int hitChance = Random.Range(1, 100);
-        
+
         if (hitChance <= hitSuccess) // if hit chance is lower than hit success, player hits 
         {
 
@@ -593,7 +684,7 @@ public class BattleSystem : MonoBehaviour
     public void DamageParticle(Unit target)
     {
         var particleObject = Instantiate(damageParticle, target.transform.position, Quaternion.identity);
-       // Destroy(particleObject, particleObject.time);
+        // Destroy(particleObject, particleObject.time);
     }
 
 
