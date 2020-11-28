@@ -10,16 +10,18 @@ public class BattleHUD : MonoBehaviour
     public Slider hpSlider;
     public Text hpHealth;
 
+    public GameObject woundTear;
+
     // Start is called before the first frame update
     void Start()
     {
-
+        woundTear.SetActive(false);
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        
     }
     public void SetHUD(Unit unit)
     {
@@ -42,6 +44,17 @@ public class BattleHUD : MonoBehaviour
         levelText.text = "Lv" + level;
        
     }
+
+    public void ShowWound()
+    {
+        woundTear.SetActive(true);
+    }
+
+    public void HideWound()
+    {
+        woundTear.SetActive(false);
+    }
+
 
 
 }

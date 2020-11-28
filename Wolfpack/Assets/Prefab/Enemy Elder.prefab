@@ -47,7 +47,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: Enemy Elder
   level: 1
-  maxHP: 60
+  maxHP: 300
   currentHP: 100
   attackDamage: 10
   specialDamage: 0

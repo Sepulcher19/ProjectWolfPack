@@ -97,8 +97,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: Elder
   level: 0
-  maxHP: 60
-  currentHP: 60
+  maxHP: 300
+  currentHP: 300
   attackDamage: 5
   specialDamage: 0
   specialCooldown: 0
