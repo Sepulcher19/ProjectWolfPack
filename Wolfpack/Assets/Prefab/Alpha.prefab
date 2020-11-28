@@ -97,8 +97,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: Alpha
   level: 1
-  maxHP: 500
-  currentHP: 500
+  maxHP: 250
+  currentHP: 250
   attackDamage: 20
   specialDamage: 0
   specialCooldown: 0

@@ -44,11 +44,7 @@ public class Unit : MonoBehaviour
             gameObject.SetActive(false);
         }
 
-        if (level >= 1)
-        {
-            gameObject.SetActive(true);
-            isDead = false;
-        }
+       
     }
 
     public bool CheckDead()

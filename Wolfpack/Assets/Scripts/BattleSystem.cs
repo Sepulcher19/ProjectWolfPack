@@ -94,13 +94,13 @@ public class BattleSystem : MonoBehaviour
         StartCoroutine(SetupBattle());
 
 
-        alphaHUD.transform.parent = alphaUnit.transform;
-        betaHUD.transform.parent = betaUnit.transform;
-        elderHUD.transform.parent = elderUnit.transform;
+       alphaHUD.transform.parent = alphaUnit.transform;
+      betaHUD.transform.parent = betaUnit.transform;
+       elderHUD.transform.parent = elderUnit.transform;
 
-        enemyAlphaHUD.transform.parent = enemyAlphaUnit.transform;
-        enemyBetaHUD.transform.parent = enemyBetaUnit.transform;
-        enemyElderHUD.transform.parent = enemyElderUnit.transform;
+       enemyAlphaHUD.transform.parent = enemyAlphaUnit.transform;
+       enemyBetaHUD.transform.parent = enemyBetaUnit.transform;
+       enemyElderHUD.transform.parent = enemyElderUnit.transform;
 
         targets.SetActive(false);
 
@@ -133,11 +133,11 @@ public class BattleSystem : MonoBehaviour
 
     private void Update()
     {
-        if (alphaUnit.currentHP < 400)
+        if (alphaUnit.currentHP < 200)
         {
             audioManager.SecondAudioChange();
         }
-        else if (playerWolves.Count <= 4)
+        else if (playerWolves.Count <= 2)
         {
             audioManager.ThirdAudioChange();
         }
@@ -173,13 +173,13 @@ public class BattleSystem : MonoBehaviour
         print(playerWolves.Count);
         CheckWin();
         WoundAll();
-       
+        
 
         if (!alphaUnit.isDead)
         {
             if (CheckHit() == true)
             {
-
+                
 
                 Unit target = confirmedTarget;
                 target.TakeDamage(alphaUnit.attackDamage);
@@ -366,6 +366,7 @@ public class BattleSystem : MonoBehaviour
     }
     IEnumerator EnemyTurn()
     {
+        Hidebuttons();
         audioManager.FirstAudioChange();
         WoundAll();
         CheckWin();
@@ -653,12 +654,15 @@ public class BattleSystem : MonoBehaviour
         {
             case "Alpha":
                 confirmedTarget = enemyAlphaUnit;
+                Hidebuttons();
                 break;
             case "Beta":
                 confirmedTarget = enemyBetaUnit;
+                Hidebuttons();
                 break;
             case "Elder":
                 confirmedTarget = enemyElderUnit;
+                Hidebuttons();
                 break;
 
         }
@@ -689,6 +693,7 @@ public class BattleSystem : MonoBehaviour
         dialogueText.text = "Alpha ready to attack!";
         primaryButton.UpdateText("Bite");
         secondaryButton.UpdateText("Summon");
+        Showbuttons();
         primaryButton.playerturn = 1;
         secondaryButton.playerturn = 1;
     }
@@ -698,6 +703,7 @@ public class BattleSystem : MonoBehaviour
         dialogueText.text = "Beta ready to attack!";
         primaryButton.UpdateText("Hunt");
         secondaryButton.UpdateText("Rush");
+        Showbuttons();
         primaryButton.playerturn = 2;
         secondaryButton.playerturn = 2;
     }
@@ -707,6 +713,7 @@ public class BattleSystem : MonoBehaviour
         dialogueText.text = "Elder ready to attack!";
         primaryButton.UpdateText("Wound");
         secondaryButton.UpdateText("Howl");
+        Showbuttons();
         primaryButton.playerturn = 3;
         secondaryButton.playerturn = 3;
     }
@@ -812,20 +819,26 @@ public class BattleSystem : MonoBehaviour
             var newBetas = Random.Range(1, 3);
             dialogueText.text = newBetas + " more wolves join your struggle";
             betaUnit.SetLevel(newBetas);
-
+            Hidebuttons();
 
 
             yield return new WaitForSeconds(1f);
             state = BattleState.BETATURN;
             BetaTurn();
         }
-        else
+        else if (betaUnit.level >= 10)
         {
             dialogueText.text = "Large packs are uncontrollable, try something else";
             yield return new WaitForSeconds(1f);
             AlphaTurn();
 
         }
+        else if (betaUnit.isDead)
+        {
+            dialogueText.text = "you're out of wolves, try something else";
+        }
+
+
     }
 
     IEnumerator EnemySummonBeta()
@@ -866,6 +879,16 @@ public class BattleSystem : MonoBehaviour
         // Destroy(particleObject, particleObject.time);
     }
 
+    public void Hidebuttons()
+    {
+        primaryButton.gameObject.SetActive(false);
+        secondaryButton.gameObject.SetActive(false);
+    }
+    public void Showbuttons()
+    {
+        primaryButton.gameObject.SetActive(true);
+        secondaryButton.gameObject.SetActive(true);
+    }
 
 
 
