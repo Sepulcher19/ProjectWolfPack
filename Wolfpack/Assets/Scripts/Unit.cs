@@ -9,7 +9,7 @@ public class Unit : MonoBehaviour
     
     public int level;
     [Header("Health")]
-    int baseMaxHP = 40;
+    int baseMaxHP = 200;
     public int maxHP;
     public int currentHP;
 
@@ -18,20 +18,52 @@ public class Unit : MonoBehaviour
     public int specialDamage;
     public int specialCooldown;
 
+    int betaBaseAttack = 6;
+    int betaSpecialAttack = 10;
     public bool isDead = false;
     public bool wounded = false;
     public int woundCounter = 3;
+
 
     [Header("Other")]
     public GameObject damageTextPrefab;
 
     private void Awake()
     {
+        
         currentHP = maxHP;
         level = 1;
     }
 
+    private void Update()
+    {
+        if (CheckDead())
+        {
+            level = 0;
+            isDead = true;
+            gameObject.SetActive(false);
+        }
 
+        if (level >= 1)
+        {
+            gameObject.SetActive(true);
+            isDead = false;
+        }
+    }
+
+    public bool CheckDead()
+    {
+        if (currentHP <= 0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+
+    }
 
     public void TakeDamage(int dmg)
     {
@@ -48,10 +80,11 @@ public class Unit : MonoBehaviour
     public void SetLevel(int addedLevel)
     {
         level += addedLevel;
-        attackDamage *= level;
-        specialDamage *= level;
+        attackDamage = (betaBaseAttack * level);
+        specialDamage = (betaSpecialAttack * level);
 
-        maxHP *= level;
+        maxHP = (baseMaxHP * level);
+        
         currentHP = currentHP + (baseMaxHP * addedLevel);
         baseMaxHP = 40;
 
@@ -61,6 +94,7 @@ public class Unit : MonoBehaviour
     }
 
     
+   
 
 
 }

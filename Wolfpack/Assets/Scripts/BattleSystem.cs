@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public enum BattleState { START, ALPHATURN, BETATURN, ELDERTURN, ENEMYTURN, ENEMYTURN2, ENEMYTURN3, WON, LOST }
 
@@ -72,7 +73,9 @@ public class BattleSystem : MonoBehaviour
     bool elderAlive = true;
     bool secondaryAttack;
     bool damageIncreased;
+    bool enemyDamageIncreased;
     bool firstAudioChange = false;
+    bool secondAudioChange = false;
    
    
     int hitSuccess = 80;
@@ -128,7 +131,18 @@ public class BattleSystem : MonoBehaviour
 
 
 
+    private void Update()
+    {
+        if (alphaUnit.currentHP < 400)
+        {
+            audioManager.SecondAudioChange();
+        }
+        else if (playerWolves.Count <= 4)
+        {
+            audioManager.ThirdAudioChange();
+        }
 
+    }
 
 
 
@@ -156,8 +170,11 @@ public class BattleSystem : MonoBehaviour
 
     IEnumerator AlphaAttack(Unit confirmedTarget)
     {
+        print(playerWolves.Count);
         CheckWin();
         WoundAll();
+       
+
         if (!alphaUnit.isDead)
         {
             if (CheckHit() == true)
@@ -290,6 +307,7 @@ public class BattleSystem : MonoBehaviour
                 Unit target = confirmedTarget;
                 target.TakeDamage(attackDamage);
                 woundedWolves.Add(target);
+                target.GetComponentInChildren<BattleHUD>().ShowWound();
                 elderAnim.SetTrigger("Attack");
                 DamageParticle(target);
 
@@ -348,36 +366,44 @@ public class BattleSystem : MonoBehaviour
     }
     IEnumerator EnemyTurn()
     {
-        if (!firstAudioChange)
-        {
-            audioManager.IncreaseParameter();
-            firstAudioChange = true; 
-        }
+        audioManager.FirstAudioChange();
         WoundAll();
         CheckWin();
       
         if (!enemyAlphaUnit.isDead)
         {
-            dialogueText.text = enemyAlphaUnit.Name + " attacks!";
-
-            yield return new WaitForSeconds(1f);
-            if (CheckHit() == true)
+            if (EnemyChooseAttack())
             {
-
-                Unit target = EnemyChooseTarget();
-                target.TakeDamage(enemyAlphaUnit.attackDamage);
-                enemyAlphaAnim.SetTrigger("Attack");
-                DamageParticle(target);
-                target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP,target.maxHP);
+                EnemySummonBeta();
+            }
+            else
+            {
+                dialogueText.text = enemyAlphaUnit.Name + " attacks!";
 
                 yield return new WaitForSeconds(1f);
-
-                if (target.isDead)
+                if (CheckHit() == true)
                 {
-                   
-                    target.gameObject.SetActive(false);
-                    playerWolves.Remove(target);
-                    if (!CheckWin())
+
+                    Unit target = EnemyChooseTarget();
+                    target.TakeDamage(enemyAlphaUnit.attackDamage);
+                    enemyAlphaAnim.SetTrigger("Attack");
+                    DamageParticle(target);
+                    target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP, target.maxHP);
+
+                    yield return new WaitForSeconds(1f);
+
+                    if (target.isDead)
+                    {
+
+                        target.gameObject.SetActive(false);
+                        playerWolves.Remove(target);
+                        if (!CheckWin())
+                        {
+                            state = BattleState.ENEMYTURN2;
+                            StartCoroutine(EnemyBetaTurn());
+                        }
+                    }
+                    else
                     {
                         state = BattleState.ENEMYTURN2;
                         StartCoroutine(EnemyBetaTurn());
@@ -385,15 +411,10 @@ public class BattleSystem : MonoBehaviour
                 }
                 else
                 {
+                    dialogueText.text = "The attack missed...";
                     state = BattleState.ENEMYTURN2;
                     StartCoroutine(EnemyBetaTurn());
                 }
-            }
-            else
-            {
-                dialogueText.text = "The attack missed...";
-                state = BattleState.ENEMYTURN2;
-                StartCoroutine(EnemyBetaTurn());
             }
         }
         else
@@ -409,7 +430,7 @@ public class BattleSystem : MonoBehaviour
         
         if (!enemyBetaUnit.isDead)
         {
-
+           
 
             dialogueText.text = enemyBetaUnit.Name + " attacks!";
 
@@ -418,28 +439,40 @@ public class BattleSystem : MonoBehaviour
             {
                 Unit target = EnemyChooseTarget();
 
-                target.TakeDamage(enemyBetaUnit.attackDamage);
-                enemyBetaAnim.SetTrigger("Attack");
-                DamageParticle(target);
-                target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP,target.maxHP);
-
-                yield return new WaitForSeconds(1f);
-
-                if (target.isDead)
+                if (EnemyChooseAttack())
                 {
-                    
-                    target.gameObject.SetActive(false);
-                    playerWolves.Remove(target);
-                    if (!CheckWin())
-                    {
-                        state = BattleState.ENEMYTURN2;
-                        StartCoroutine(EnemyBetaTurn());
-                    }
+                    target.TakeDamage(enemyBetaUnit.specialDamage);
+                    enemyBetaUnit.TakeDamage(6 * betaUnit.level);
+                    enemyBetaUnit.GetComponentInChildren<BattleHUD>().SetHP(enemyBetaUnit.currentHP, enemyBetaUnit.maxHP);
+
+                    dialogueText.text = "enemy beta rushed player!";
                 }
                 else
                 {
-                    state = BattleState.ENEMYTURN3;
-                    StartCoroutine(EnemyElderTurn());
+
+                    target.TakeDamage(enemyBetaUnit.attackDamage);
+                    enemyBetaAnim.SetTrigger("Attack");
+                    DamageParticle(target);
+                    target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP, target.maxHP);
+
+                    yield return new WaitForSeconds(1f);
+
+                    if (target.isDead)
+                    {
+
+                        target.gameObject.SetActive(false);
+                        playerWolves.Remove(target);
+                        if (!CheckWin())
+                        {
+                            state = BattleState.ENEMYTURN2;
+                            StartCoroutine(EnemyBetaTurn());
+                        }
+                    }
+                    else
+                    {
+                        state = BattleState.ENEMYTURN3;
+                        StartCoroutine(EnemyElderTurn());
+                    }
                 }
             }
             else
@@ -462,27 +495,49 @@ public class BattleSystem : MonoBehaviour
         
         if (!enemyElderUnit.isDead)
         {
-
-            dialogueText.text = enemyElderUnit.Name + " attacks!";
-
-            yield return new WaitForSeconds(1f);
-            if (CheckHit() == true)
+            if (EnemyChooseAttack() && !enemyDamageIncreased)
             {
-                Unit target = EnemyChooseTarget();
+                enemyAlphaUnit.attackDamage = enemyAlphaUnit.attackDamage * 2;
+                enemyBetaUnit.attackDamage = enemyBetaUnit.attackDamage * 2;
+                enemyElderUnit.attackDamage = enemyElderUnit.attackDamage * 2;
+                enemyDamageIncreased = true;
 
-                target.TakeDamage(enemyElderUnit.attackDamage);
-                woundedWolves.Add(target);
-                enemyElderAnim.SetTrigger("Attack");
-                DamageParticle(target);
-                target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP, target.maxHP);
+                dialogueText.text = "the enemy buffed their team!";
 
                 yield return new WaitForSeconds(1f);
 
-                if (target.isDead)
+                state = BattleState.ALPHATURN;
+                AlphaTurn();
+            }
+            else
+            {
+                dialogueText.text = enemyElderUnit.Name + " attacks!";
+
+                yield return new WaitForSeconds(1f);
+                if (CheckHit() == true)
                 {
-                    target.gameObject.SetActive(false);
-                    playerWolves.Remove(target);
-                    if (!CheckWin())
+                    Unit target = EnemyChooseTarget();
+
+                    target.TakeDamage(enemyElderUnit.attackDamage);
+                    woundedWolves.Add(target);
+                    target.GetComponentInChildren<BattleHUD>().ShowWound();
+                    enemyElderAnim.SetTrigger("Attack");
+                    DamageParticle(target);
+                    target.gameObject.GetComponentInChildren<BattleHUD>().SetHP(target.currentHP, target.maxHP);
+
+                    yield return new WaitForSeconds(1f);
+
+                    if (target.isDead)
+                    {
+                        target.gameObject.SetActive(false);
+                        playerWolves.Remove(target);
+                        if (!CheckWin())
+                        {
+                            state = BattleState.ALPHATURN;
+                            AlphaTurn();
+                        }
+                    }
+                    else
                     {
                         state = BattleState.ALPHATURN;
                         AlphaTurn();
@@ -490,22 +545,33 @@ public class BattleSystem : MonoBehaviour
                 }
                 else
                 {
+                    dialogueText.text = "The attack missed...";
                     state = BattleState.ALPHATURN;
                     AlphaTurn();
                 }
             }
-            else
-            {
-                dialogueText.text = "The attack missed...";
-                state = BattleState.ALPHATURN;
-                AlphaTurn();
-            } 
         }
         else
         {
             state = BattleState.ALPHATURN;
             AlphaTurn();
         }
+    }
+
+    public bool EnemyChooseAttack()
+    {
+        int attack = Random.Range(1, 2);
+
+        if (attack == 1)
+        {
+            return false;
+        }
+        else if(attack == 2)
+        {
+            return true;
+        }
+        else { return false; }
+
     }
     public Unit EnemyChooseTarget()
     {
@@ -654,6 +720,7 @@ public class BattleSystem : MonoBehaviour
         else if (state == BattleState.LOST)
         {
             dialogueText.text = "you were Defeated.";
+            
         }
 
     }
@@ -683,10 +750,11 @@ public class BattleSystem : MonoBehaviour
         if (woundedWolves != null)
         {
 
-            foreach (Unit wounded in woundedWolves)
+            foreach (Unit wounded in woundedWolves.ToArray())
             {
-                if (wounded.woundCounter > 0)
+                if (wounded.woundCounter > 1)
                 {
+                    
                     wounded.woundCounter--;
                     wounded.TakeDamage(5);
                     wounded.GetComponentInChildren<BattleHUD>().SetHP(wounded.currentHP, wounded.maxHP);
@@ -694,7 +762,9 @@ public class BattleSystem : MonoBehaviour
                 }
                 else
                 {
+                    wounded.GetComponentInChildren<BattleHUD>().HideWound();
                     woundedWolves.Remove(wounded);
+                   
                 }
 
             }
@@ -756,6 +826,24 @@ public class BattleSystem : MonoBehaviour
             AlphaTurn();
 
         }
+    }
+
+    IEnumerator EnemySummonBeta()
+    {
+
+        if (enemyBetaUnit.level < 10)
+        {
+            var newBetas = Random.Range(1, 3);
+            dialogueText.text = newBetas + " more wolves side with the enemy";
+            enemyBetaUnit.SetLevel(newBetas);
+
+
+
+            yield return new WaitForSeconds(1f);
+            state = BattleState.ENEMYTURN2;
+            StartCoroutine(EnemyBetaTurn());
+        }
+        
     }
 
 

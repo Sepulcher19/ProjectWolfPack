@@ -10,6 +10,11 @@ public class AudioManager : MonoBehaviour
     float parameterNumber = 0;
 
     public bool inBattle = false;
+
+
+    bool firstAudio = false;
+    bool secondAudio = false;
+    bool thirdAudio = false;
     void Start()
     {
         gameMusic = FMODUnity.RuntimeManager.CreateInstance("event:/Music");
@@ -20,9 +25,30 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    public void IncreaseParameter()
+    public void FirstAudioChange()
     {
-        parameterNumber += 1;
-        gameMusic.setParameterByName("Instruments", parameterNumber);
+        if (!firstAudio)
+        {
+            gameMusic.setParameterByName("Instruments", 1);
+            firstAudio = true;
+        }
+    }
+
+    public void SecondAudioChange()
+    {
+        if (!secondAudio)
+        {
+            gameMusic.setParameterByName("Instruments", 2);
+            secondAudio = true;
+        }
+    }
+
+    public void ThirdAudioChange()
+    {
+        if (!thirdAudio)
+        {
+            gameMusic.setParameterByName("Instruments", 3);
+            thirdAudio = true;
+        }
     }
 }

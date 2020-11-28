@@ -47,7 +47,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: Enemy Beta
   level: 1
-  maxHP: 40
+  maxHP: 200
   currentHP: 100
   attackDamage: 6
   specialDamage: 0
