@@ -68,6 +68,7 @@
     <Compile Include="Assets\Scripts\BattleHUD.cs" />
     <Compile Include="Assets\Scripts\BattleSystem.cs" />
     <Compile Include="Assets\Scripts\DamageText.cs" />
+    <Compile Include="Assets\Scripts\TextBox.cs" />
     <Compile Include="Assets\Scripts\Unit.cs" />
     <None Include="Assets\Audio\wolfpack Fmod\Metadata\Platform\{649b253a-c53b-48cd-baaf-50c2f729f950}.xml" />
     <None Include="Assets\Audio\wolfpack Fmod\Metadata\Event\{3f237214-71c4-4c90-b2a4-ce1cb4d2a619}.xml" />
